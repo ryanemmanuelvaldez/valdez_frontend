@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /FinalProjects/Frontend/
+    RewriteRule ^$ dist/ [R=302,L]
+</IfModule>
