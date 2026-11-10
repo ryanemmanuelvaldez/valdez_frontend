@@ -1,4 +1,20 @@
-export const API_BASE = new URL("../../BackendLL/api", window.location.href).toString();
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+function resolveApiBase() {
+  if (!configuredApiBase) {
+    return new URL("../../BackendLL/api", window.location.href).toString().replace(/\/+$/, "");
+  }
+
+  const url = new URL(configuredApiBase, window.location.origin);
+  const path = url.pathname.replace(/\/+$/, "");
+  if (!path.toLowerCase().endsWith("/api")) {
+    url.pathname = `${path}/api`;
+  }
+  url.search = "";
+  url.hash = "";
+  return url.toString().replace(/\/+$/, "");
+}
+
+export const API_BASE = resolveApiBase();
 
 export async function apiRequest(path, data, method = "POST") {
   let response;

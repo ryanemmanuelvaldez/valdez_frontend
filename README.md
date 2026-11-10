@@ -28,6 +28,8 @@ RentEase analytics use Chart.js line graphs for confirmed monthly rental income 
 
 Property cards can show a Google Maps Embed API preview of the rental address. Owners can set or move saved property pins in the property forms; the owner and admin overview maps show every saved property coordinate. Copy `Frontend/.env.example` to `Frontend/.env.local`, set `VITE_GOOGLE_MAPS_API_KEY` to a Google Maps API key, enable both Maps Embed API and Maps JavaScript API for its Google Cloud project, and restart Vite or rebuild the frontend. The browser bundle includes the key, so restrict it to these APIs and the frontend's HTTP referrers in Google Cloud Console. If the JavaScript API is unavailable, the coordinate fields remain editable and the map displays the API error.
 
+For deployment, set `VITE_API_BASE_URL` in the frontend host's build environment to the backend URL (for example, `https://your-backend.example.com` or `https://your-backend.example.com/api`); the frontend adds `/api` when it is not already present. Leave it blank for the local XAMPP/Vite setup; the app then uses the existing relative backend path. Vite environment values are embedded at build time, so rebuild/redeploy the frontend after changing this value. If frontend and backend use different origins, set the backend `API_ALLOWED_ORIGINS` to the exact frontend origin and configure credentialed CORS plus secure session cookies (`SESSION_COOKIE_SAMESITE=None` for cross-site hosting); production cookies are marked Secure automatically.
+
 Property coordinates are saved in the `rentals` table by migration `023_add_rental_coordinates.php`. Run `C:\xampp\php\php.exe BackendLL\lava db:migrate` from the project root after pulling these changes.
 
 ## Backend setup
