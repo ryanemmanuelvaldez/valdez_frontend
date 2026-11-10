@@ -1,4 +1,5 @@
-const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim()
+  || (import.meta.env.PROD ? "https://valdez-backend.onrender.com/api" : "");
 function resolveApiBase() {
   if (!configuredApiBase) {
     return new URL("../../BackendLL/api", window.location.href).toString().replace(/\/+$/, "");
