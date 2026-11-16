@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import BrandLogo from "./components/BrandLogo.jsx";
@@ -8,6 +8,8 @@ import RentalMap from "./components/RentalMap.jsx";
 import { demoListings } from "./data/demoListings.js";
 import { API_BASE, apiRequest, apiUpload, propertyPhotoSource, request } from "./lib/api.js";
 import "../styles.css";
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim() || "";
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -69,13 +71,111 @@ function ScreenLinks({ children }) {
   return <p className="switch-copy">{children}</p>;
 }
 
-function LoginScreen({ onLogin, pending }) {
+function RecaptchaCheckbox({ onTokenChange, resetKey }) {
+  const containerRef = useRef(null);
+  const widgetIdRef = useRef(null);
+  const onTokenChangeRef = useRef(onTokenChange);
+  const [widgetMessage, setWidgetMessage] = useState("");
+
+  useEffect(() => {
+    onTokenChangeRef.current = onTokenChange;
+  }, [onTokenChange]);
+
+  useEffect(() => {
+    if (!RECAPTCHA_SITE_KEY) return undefined;
+    let active = true;
+    const scriptSelector = "script[data-rentease-recaptcha]";
+    let script = document.querySelector(scriptSelector);
+
+    const renderWidget = () => {
+      if (!active || !window.grecaptcha || !containerRef.current || widgetIdRef.current !== null) return;
+      window.grecaptcha.ready(() => {
+        if (!active || !containerRef.current || widgetIdRef.current !== null) return;
+        try {
+          widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
+            sitekey: RECAPTCHA_SITE_KEY,
+            callback: (token) => {
+              onTokenChangeRef.current(token);
+              setWidgetMessage("");
+            },
+            "expired-callback": () => {
+              onTokenChangeRef.current("");
+              setWidgetMessage("The reCAPTCHA expired. Please check the box again.");
+            },
+            "error-callback": () => {
+              onTokenChangeRef.current("");
+              setWidgetMessage("reCAPTCHA could not load. Check your connection and try again.");
+            },
+          });
+        } catch {
+          setWidgetMessage("reCAPTCHA could not be initialized. Reload the page and try again.");
+        }
+      });
+    };
+
+    const onScriptLoad = () => renderWidget();
+    const onScriptError = () => setWidgetMessage("reCAPTCHA could not load. Check your connection and try again.");
+
+    if (!script) {
+      script = document.createElement("script");
+      script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.dataset.renteaseRecaptcha = "true";
+    }
+    script.addEventListener("load", onScriptLoad);
+    script.addEventListener("error", onScriptError);
+    if (window.grecaptcha) renderWidget();
+    else if (!script.isConnected) document.head.appendChild(script);
+
+    return () => {
+      active = false;
+      script.removeEventListener("load", onScriptLoad);
+      script.removeEventListener("error", onScriptError);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (resetKey === 0) return;
+    onTokenChangeRef.current("");
+    if (widgetIdRef.current !== null && window.grecaptcha?.reset) {
+      window.grecaptcha.reset(widgetIdRef.current);
+    }
+  }, [resetKey]);
+
+  return (
+    <div className="recaptcha-field">
+      {RECAPTCHA_SITE_KEY
+        ? <div ref={containerRef} className="recaptcha-widget" />
+        : <small role="alert">reCAPTCHA is not configured. Add the site key to the frontend environment.</small>}
+      {widgetMessage && <small role="alert">{widgetMessage}</small>}
+    </div>
+  );
+}
+
+function LoginScreen({ onLogin, onError, pending }) {
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
+
   async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
+    if (!captchaToken) {
+      onError("Complete the reCAPTCHA check before signing in.");
+      return;
+    }
     const fields = new FormData(form);
-    await onLogin({ email: fields.get("email"), password: fields.get("password") });
+    try {
+      await onLogin({
+        email: fields.get("email"),
+        password: fields.get("password"),
+        recaptcha_token: captchaToken,
+      });
+    } finally {
+      setCaptchaToken("");
+      setCaptchaResetKey((key) => key + 1);
+    }
   }
 
   return (
@@ -88,6 +188,7 @@ function LoginScreen({ onLogin, pending }) {
         <div className="form-options">
           <a href="#forgot">Forgot password?</a>
         </div>
+        <RecaptchaCheckbox onTokenChange={setCaptchaToken} resetKey={captchaResetKey} />
         <SubmitButton pending={pending}>Sign in</SubmitButton>
       </form>
       <ScreenLinks>No account? <a href="#register">Create one</a></ScreenLinks>
@@ -96,6 +197,9 @@ function LoginScreen({ onLogin, pending }) {
 }
 
 function RegisterScreen({ onRegister, onError, pending }) {
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
+
   async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -107,14 +211,24 @@ function RegisterScreen({ onRegister, onError, pending }) {
       onError("The passwords do not match.");
       return;
     }
-    await onRegister({
-      full_name: fields.get("full_name"),
-      email: fields.get("email"),
-      phone: fields.get("phone"),
-      account_type: fields.get("account_type"),
-      password,
-      password_confirmation: passwordConfirmation,
-    });
+    if (!captchaToken) {
+      onError("Complete the reCAPTCHA check before creating your account.");
+      return;
+    }
+    try {
+      await onRegister({
+        full_name: fields.get("full_name"),
+        email: fields.get("email"),
+        phone: fields.get("phone"),
+        account_type: fields.get("account_type"),
+        password,
+        password_confirmation: passwordConfirmation,
+        recaptcha_token: captchaToken,
+      });
+    } finally {
+      setCaptchaToken("");
+      setCaptchaResetKey((key) => key + 1);
+    }
   }
 
   return (
@@ -132,6 +246,7 @@ function RegisterScreen({ onRegister, onError, pending }) {
         </select>
         <TextField id="register-password" label="Password" name="password" type="password" autoComplete="new-password" minLength={8} maxLength={72} placeholder="At least 8 characters" required />
         <TextField id="register-confirm" label="Confirm password" name="password_confirmation" type="password" autoComplete="new-password" minLength={8} maxLength={72} placeholder="Enter your password again" required />
+        <RecaptchaCheckbox onTokenChange={setCaptchaToken} resetKey={captchaResetKey} />
         <SubmitButton pending={pending}>Create account</SubmitButton>
       </form>
       <ScreenLinks>
@@ -2829,7 +2944,7 @@ function App() {
     if (screen === "forgot") {
       return <EmailFlowScreen key={screen} screen={screen} onSubmit={handleEmailFlow} pending={pending} />;
     }
-    return <LoginScreen onLogin={(payload) => signIn("login", payload)} pending={pending} />;
+    return <LoginScreen onLogin={(payload) => signIn("login", payload)} onError={setNotice} pending={pending} />;
   }
 
   const isAdminWorkspace = user?.role === "admin" && (screen === "dashboard" || screen.startsWith("admin/"));

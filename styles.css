@@ -1172,6 +1172,20 @@ select:focus {
   font-weight: 600;
 }
 
+.recaptcha-field {
+  min-height: 78px;
+  margin: 6px 0 2px;
+  overflow-x: auto;
+}
+
+.recaptcha-field small {
+  display: block;
+  margin: 5px 0;
+  color: #8a332b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .check-label {
   display: inline-flex;
   align-items: center;
