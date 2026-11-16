@@ -581,17 +581,19 @@ function TenantDashboard({ user, route }) {
                         />}
                       </>
                     ) : request.initial_payment_status === "pending" || request.initial_payment_status === "creating" ? (
-                      <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, request.initial_payment_method || "gcash")}>
-                        {checkoutRequestId === request.id ? "Opening checkout…" : `Continue ${String(request.initial_payment_method || "GCash").toUpperCase()} checkout`}
-                      </button>
+                      request.initial_payment_status === "pending" && request.initial_payment_checkout_url
+                        ? <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, request.initial_payment_method || "gcash")}>
+                            {checkoutRequestId === request.id ? "Opening checkout…" : `Continue existing ${String(request.initial_payment_method || "GCash").toUpperCase()} checkout`}
+                          </button>
+                        : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
                     ) : (
                       <div className="online-payment-options">
-                        <span>Pay online with</span>
+                        <span>Online checkout with Xendit</span>
                         <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, "gcash")}>GCash</button>
                         <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, "maya")}>Maya</button>
                       </div>
                     )}
-                    <small>First month rent + deposit · Online checkout is confirmed by Xendit.</small>
+                    <small>First month rent + deposit · Online payments may have provider fees. Direct wallet transfers may avoid gateway fees; wallet fees may still apply.</small>
                     {!["pending_owner_confirmation", "pending", "creating"].includes(request.initial_payment_status) && <PhysicalPaymentAction
                       gcashQr={request.owner_gcash_qr_data}
                       mayaQr={request.owner_maya_qr_data}
@@ -761,20 +763,25 @@ function TenantRentPayments({ rentSchedule, loading, error, checkoutRequestId, o
                   onSubmit={(method, receipt) => onPhysicalPayment(installment.id, method, receipt)}
                 />}
               </>}
-              {["due", "overdue", "upcoming", "pending", "creating"].includes(installment.status) && <>
-                <div className="online-payment-options">
-                  {["pending", "creating"].includes(installment.status)
-                    ? <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, installment.payment_method || "gcash")}>{checkoutRequestId === `installment-${installment.id}` ? "Opening…" : `Continue ${String(installment.payment_method || "GCash").toUpperCase()}`}</button>
-                    : <><button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "gcash")}>{installment.status === "upcoming" ? "Advance pay · GCash" : "Pay online · GCash"}</button><button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "maya")}>{installment.status === "upcoming" ? "Advance pay · Maya" : "Pay online · Maya"}</button></>}
-                </div>
-                {!["pending", "creating"].includes(installment.status) && <PhysicalPaymentAction
+              {["pending", "creating"].includes(installment.status) && (
+                installment.status === "pending" && installment.checkout_url
+                  ? <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, installment.payment_method || "gcash")}>{checkoutRequestId === `installment-${installment.id}` ? "Opening…" : `Continue existing ${String(installment.payment_method || "GCash").toUpperCase()} checkout`}</button>
+                  : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
+              )}
+              {["due", "overdue", "upcoming"].includes(installment.status) && <div className="online-payment-options">
+                <span>Online checkout with Xendit</span>
+                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "gcash")}>{installment.status === "upcoming" ? "Advance pay · GCash" : "GCash"}</button>
+                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "maya")}>{installment.status === "upcoming" ? "Advance pay · Maya" : "Maya"}</button>
+              </div>}
+              {["due", "overdue", "upcoming"].includes(installment.status) && <>
+                <PhysicalPaymentAction
                   gcashQr={installment.owner_gcash_qr_data}
                   mayaQr={installment.owner_maya_qr_data}
                   ownerPhone={installment.owner_phone}
                   pending={checkoutRequestId === `physical-installment-${installment.id}`}
                   advancePayment={installment.status === "upcoming"}
                   onSubmit={(method, receipt) => onPhysicalPayment(installment.id, method, receipt)}
-                />}
+                />
                 {["due", "overdue", "upcoming"].includes(installment.status) && <CashPaymentReceiptAction
                     advancePayment={installment.status === "upcoming"}
                     pending={checkoutRequestId === `physical-installment-${installment.id}`}
