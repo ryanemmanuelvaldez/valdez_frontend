@@ -68,6 +68,89 @@ function SubmitButton({ children, pending, pendingLabel = "Please wait…" }) {
   );
 }
 
+function AccountAvatar({ user, className = "" }) {
+  const initials = String(user.full_name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "U";
+  return (
+    <span className={`account-avatar ${className}`.trim()} aria-hidden="true">
+      {user.profile_photo ? <img src={user.profile_photo} alt="" /> : initials}
+    </span>
+  );
+}
+
+function ProfilePhotoEditor({ user, onUserUpdate }) {
+  const inputRef = useRef(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  async function handleFileChange(event) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    setError("");
+    setNotice("");
+    if (!file) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      input.value = "";
+      setError("Choose a JPEG or PNG photo from your device.");
+      return;
+    }
+    if (file.size < 1 || file.size > 2 * 1024 * 1024) {
+      input.value = "";
+      setError("Choose a photo no larger than 2 MB.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("profile_photo", file);
+    setPending(true);
+    try {
+      const result = await apiUpload("auth/profile-photo", formData);
+      onUserUpdate(result.user);
+      setNotice(result.message || "Profile photo updated.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "The profile photo could not be uploaded.");
+    } finally {
+      setPending(false);
+      input.value = "";
+    }
+  }
+
+  return (
+    <div className="profile-photo-editor">
+      <button
+        className="profile-photo-avatar-button"
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={pending}
+        aria-label={user.profile_photo ? "Change profile photo" : "Upload profile photo"}
+      >
+        <AccountAvatar user={user} className="profile-photo-avatar" />
+      </button>
+      <div className="profile-photo-actions">
+        <input
+          ref={inputRef}
+          className="sr-only"
+          type="file"
+          accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+          onChange={handleFileChange}
+          disabled={pending}
+        />
+        <button className="profile-photo-button" type="button" onClick={() => inputRef.current?.click()} disabled={pending}>
+          {pending ? "Uploading…" : user.profile_photo ? "Change photo" : "Upload photo"}
+        </button>
+        <small>JPEG or PNG from this device · up to 2 MB</small>
+        {(error || notice) && <span className="profile-photo-message" role={error ? "alert" : "status"}>{error || notice}</span>}
+      </div>
+    </div>
+  );
+}
+
 function ScreenLinks({ children }) {
   return <p className="switch-copy">{children}</p>;
 }
@@ -389,47 +472,84 @@ function NavIcon({ name }) {
 function AccountScreen({ user, onLogout, onUserUpdate, pending, route }) {
   if (user.role === "admin") {
     return <AdminWorkspace user={user} onLogout={onLogout} pending={pending} route={route} />;
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  useEffect(() => {
+    setSidebarExpanded(false);
+    setMobileNavOpen(false);
+  }, [route]);
+
   }
 
   const accountType = user.account_type === "owner" ? "owner" : "tenant";
   const routePath = route.split("/")[1] || "dashboard";
   const routes = workspaceRoutes[accountType];
   const routeInfo = routes.find((item) => item.path === routePath) || routes[0];
-  const initials = user.full_name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+  const workspaceClasses = [
+    "workspace-shell",
+    `workspace-${accountType}`,
+    sidebarExpanded ? "workspace-sidebar-expanded" : "",
+    mobileNavOpen ? "workspace-mobile-nav-open" : "",
+  ].filter(Boolean).join(" ");
 
   return (
-    <div className={`workspace-shell workspace-${accountType}`}>
-      <aside className="workspace-sidebar">
+    <div className={workspaceClasses}>
+      <aside
+        className="workspace-sidebar"
+        id="workspace-navigation"
+        ref={sidebarRef}
+        onMouseEnter={() => setSidebarExpanded(true)}
+        onMouseLeave={() => {
+          if (!sidebarRef.current?.contains(document.activeElement)) setSidebarExpanded(false);
+        }}
+        onFocusCapture={() => setSidebarExpanded(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setSidebarExpanded(false);
+        }}
+      >
         <div className="workspace-sidebar-heading">
           <div className="workspace-brand-mark" aria-hidden="true">RE</div>
           <div><span>RENTEASE</span><strong>{accountType === "owner" ? "Owner workspace" : "Tenant workspace"}</strong></div>
         </div>
         <nav aria-label={`${accountType} workspace`}>
           {routes.map((item) => (
-            <a key={item.path} className={routeInfo.path === item.path ? "active" : ""} href={`#${accountType}/${item.path}`} aria-current={routeInfo.path === item.path ? "page" : undefined}>
-              <NavIcon name={item.icon} />{item.label}
+            <a key={item.path} className={routeInfo.path === item.path ? "active" : ""} href={`#${accountType}/${item.path}`} aria-current={routeInfo.path === item.path ? "page" : undefined} title={item.label} onClick={() => setMobileNavOpen(false)}>
+              <NavIcon name={item.icon} /><span className="workspace-nav-label">{item.label}</span>
             </a>
           ))}
         </nav>
-        <div className="workspace-sidebar-profile">
-          <span className="account-avatar" aria-hidden="true">{initials}</span>
-          <div><strong>{user.full_name}</strong><small>{user.email}</small></div>
-          <button type="button" onClick={onLogout} disabled={pending}>{pending ? "Signing out…" : "Sign out"}</button>
-        </div>
       </aside>
       <section className="workspace-content">
         <header className="workspace-topbar">
-          <div><span>{accountType === "owner" ? "OWNER PORTAL" : "TENANT PORTAL"}</span><strong>{routeInfo.label}</strong></div>
-          <span className="workspace-welcome">Welcome, {user.full_name.trim().split(/\s+/)[0]}</span>
+          <div className="workspace-topbar-start">
+            <button
+              className="workspace-menu-toggle"
+              type="button"
+              onClick={() => setMobileNavOpen((open) => !open)}
+              aria-label={mobileNavOpen ? "Close workspace navigation" : "Open workspace navigation"}
+              aria-expanded={mobileNavOpen}
+              aria-controls="workspace-navigation"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d={mobileNavOpen ? "m6 6 12 12M18 6 6 18" : "M4 6h16M4 12h16M4 18h16"} />
+              </svg>
+            </button>
+            <div><span>{accountType === "owner" ? "OWNER PORTAL" : "TENANT PORTAL"}</span><strong>{routeInfo.label}</strong></div>
+          </div>
+          <a className="workspace-profile-link" href={`#${accountType}/profile`} aria-label={`Open ${user.full_name}'s profile`} title="My profile">
+            <AccountAvatar user={user} className="workspace-profile-avatar" />
+          </a>
         </header>
         <section className="workspace-page">
           {routeInfo.path === "profile" ? (
             <section className="profile-panel workspace-profile-panel">
-              <div className="account-heading">
-                <div><p className="eyebrow">YOUR RENTEASE ACCOUNT</p><h2>Profile & account</h2></div>
-                <span className="account-avatar" aria-hidden="true">{initials}</span>
+              <div className="workspace-profile-heading">
+                <p className="eyebrow">YOUR RENTEASE ACCOUNT</p>
+                <h2>Profile & account</h2>
               </div>
-              <dl className="profile-list">
+              <ProfilePhotoEditor user={user} onUserUpdate={onUserUpdate} />
+              <dl className="profile-list profile-list-centered">
                 <div><dt>Full name</dt><dd>{user.full_name}</dd></div>
                 <div><dt>Email address</dt><dd>{user.email}</dd></div>
                 <div><dt>Email verification</dt><dd>{user.email_verified_at ? "Verified" : "Not verified"}</dd></div>
