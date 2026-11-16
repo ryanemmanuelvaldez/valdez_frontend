@@ -5691,52 +5691,36 @@ html {
   line-height: 1.5;
 }
 
-.reservation-calendar .fc {
-  --fc-border-color: #e0e8e0;
-  --fc-button-text-color: #315b42;
-  --fc-button-bg-color: #fff;
-  --fc-button-border-color: #d3dfd4;
-  --fc-button-hover-bg-color: #edf4ed;
-  --fc-button-hover-border-color: #b7cdb9;
-  --fc-button-active-bg-color: #159c96;
-  --fc-button-active-border-color: #159c96;
-  --fc-today-bg-color: #f0f8f6;
-  color: #263b30;
+.reservation-calendar {
   font-family: inherit;
   font-size: 15px;
 }
 
-.reservation-calendar .fc .fc-toolbar-title {
+.reservation-calendar-toolbar {
+  align-items: center;
+}
+
+.reservation-calendar-title {
   color: #263b30;
   font-size: 1.35em;
   font-weight: 650;
 }
 
-.reservation-calendar .fc .fc-button {
+.reservation-calendar-button {
   border-radius: 7px;
   box-shadow: none;
   font: inherit;
-  font-weight: 650;
+  font-size: 14px;
   text-transform: none;
 }
 
-.reservation-calendar .fc .fc-button:focus {
-  box-shadow: 0 0 0 3px rgba(21, 156, 150, .2);
-}
-
-.reservation-calendar .fc .fc-daygrid-event {
-  border-color: #159c96;
-  background: #159c96;
-  white-space: normal;
-}
-
-.reservation-calendar .fc .reservation-event-ended {
-  border-color: #829087;
-  background: #829087;
-}
-
-.reservation-calendar .fc .fc-event-title {
+.reservation-calendar-event-title {
+  font-size: 13px;
   font-weight: 600;
+}
+
+.reservation-calendar-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(21, 156, 150, .2);
 }
 
 .reservation-calendar-detail {
@@ -5780,25 +5764,20 @@ html {
 }
 
 @media (max-width: 640px) {
-  .reservation-calendar .fc .fc-toolbar {
+  .reservation-calendar-toolbar {
     align-items: stretch;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
   }
 
-  .reservation-calendar .fc .fc-toolbar-chunk {
-    display: flex;
-    flex-wrap: wrap;
+  .reservation-calendar-toolbar-section {
     justify-content: center;
   }
 
-  .reservation-calendar .fc .fc-toolbar-title {
+  .reservation-calendar-title {
     margin: 3px 0;
     text-align: center;
-  }
-
-  .reservation-calendar .fc .fc-button {
-    padding: .35em .5em;
   }
 
   .reservation-calendar-detail {

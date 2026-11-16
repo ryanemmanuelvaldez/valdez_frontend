@@ -9,13 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fullcalendar/daygrid": "^6.1.22",
-    "@fullcalendar/list": "^6.1.22",
-    "@fullcalendar/react": "^6.1.22",
-    "@fullcalendar/timegrid": "^6.1.22",
+    "@fullcalendar/react": "^7.1.5",
     "chart.js": "^4.6.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "temporal-polyfill": "^1.0.8"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",

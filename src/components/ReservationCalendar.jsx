@@ -1,8 +1,11 @@
 import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import listPlugin from "@fullcalendar/list";
+import dayGridPlugin from "@fullcalendar/react/daygrid";
+import listPlugin from "@fullcalendar/react/list";
+import themePlugin from "@fullcalendar/react/themes/monarch";
+import "@fullcalendar/react/skeleton.css";
+import "@fullcalendar/react/themes/monarch/theme.css";
+import "@fullcalendar/react/themes/monarch/palettes/purple.css";
 
 function normalizeReservationDate(value) {
   const date = String(value || "").slice(0, 10);
@@ -40,7 +43,7 @@ function formatDate(value) {
   });
 }
 
-export default function ReservationCalendar({ reservations, scope }) {
+export default function ReservationCalendar({ reservations, scope, onRefresh }) {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const events = (reservations || []).flatMap((reservation) => {
     const confirmed = scope === "owner"
@@ -62,7 +65,7 @@ export default function ReservationCalendar({ reservations, scope }) {
       start,
       end,
       allDay: true,
-      classNames: tenancyStatus === "Ended" ? ["reservation-event-ended"] : [],
+      ...(tenancyStatus === "Ended" ? { backgroundColor: "#788780", borderColor: "#788780" } : {}),
       extendedProps: {
         rentalTitle: reservation.rental_title || "Rental",
         tenantName,
@@ -80,10 +83,26 @@ export default function ReservationCalendar({ reservations, scope }) {
         {events.length} confirmed reservation{events.length === 1 ? "" : "s"}. Requests awaiting payment are not shown.
       </p>
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
+        plugins={[themePlugin, dayGridPlugin, listPlugin]}
         initialView="dayGridMonth"
-        headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,listMonth" }}
-        buttonText={{ today: "Today", month: "Month", week: "Week", list: "Agenda" }}
+        headerToolbar={{ left: "refreshReservations today prev,next", center: "title", right: "dayGridMonth,dayGridWeek,listMonth" }}
+        buttons={{
+          refreshReservations: {
+            text: "Refresh",
+            hint: "Refresh reservation data",
+            isPrimary: true,
+            click: () => onRefresh?.(),
+          },
+        }}
+        buttonText={{ today: "Today", month: "Month", week: "Week", list: "List" }}
+        headerToolbarClass="reservation-calendar-toolbar"
+        toolbarSectionClass="reservation-calendar-toolbar-section"
+        toolbarTitleClass="reservation-calendar-title"
+        buttonClass="reservation-calendar-button"
+        weekNumbers
+        weekTextShort="W"
+        firstDay={0}
+        fixedWeekCount
         events={events}
         eventClick={({ event }) => setSelectedReservation({
           id: event.id,

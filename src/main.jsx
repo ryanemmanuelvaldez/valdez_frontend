@@ -1366,13 +1366,13 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     if ((route === "dashboard" || route === "renters") && user.owner_status === "verified") {
       tasks.push({ key: "renters", promise: apiRequest("owner/renters", undefined, "GET") });
     }
-    tasks.push({ key: "documents", promise: apiRequest("owner/verification-documents", undefined, "GET") });
-    if ((route === "dashboard" || route === "payments") && user.owner_status === "verified") {
     if (route === "calendar" && user.owner_status === "verified") {
       tasks.push({ key: "calendarRenters", promise: apiRequest("owner/renters", undefined, "GET") });
     }
       tasks.push({ key: "payments", promise: apiRequest("owner/payments", undefined, "GET") });
       tasks.push({ key: "income", promise: apiRequest("owner/income", undefined, "GET") });
+    tasks.push({ key: "documents", promise: apiRequest("owner/verification-documents", undefined, "GET") });
+    if ((route === "dashboard" || route === "payments") && user.owner_status === "verified") {
     }
     if (route === "dashboard" && user.owner_status === "verified") {
       tasks.push({ key: "ratings", promise: apiRequest("owner/ratings", undefined, "GET") });
@@ -1413,13 +1413,13 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       if (route === "requests") {
         const result = await apiRequest("owner/requests", undefined, "GET");
         setRentalRequests(result.requests || []);
-      } else if (route === "renters" && user.owner_status === "verified") {
-        const result = await apiRequest("owner/renters", undefined, "GET");
       } else if (route === "calendar" && user.owner_status === "verified") {
         const result = await apiRequest("owner/renters", undefined, "GET");
         setCalendarRenters(result.renters || []);
         setRenters(result.renters || []);
       } else if (route === "payments" && user.owner_status === "verified") {
+      } else if (route === "renters" && user.owner_status === "verified") {
+        const result = await apiRequest("owner/renters", undefined, "GET");
         const [paymentResult, incomeResult] = await Promise.all([
           apiRequest("owner/payments", undefined, "GET"),
           apiRequest("owner/income", undefined, "GET"),
@@ -1430,7 +1430,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       }
       setLoadError("");
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "Could not refresh owner payment data.");
+      setLoadError(error instanceof Error ? error.message : "Could not refresh owner data.");
     }
   }, [route, user.owner_status, user.phone]);
   useEffect(() => {
@@ -1716,17 +1716,16 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
         </div>
         {loading ? <p className="dashboard-empty">Loading your property locations…</p> : listings.length ? <PropertyLocations listings={propertyLocations} emptyMessage="No property locations have been pinned yet. Edit a property to place its map pin." /> : <p className="dashboard-empty">Add a property listing to see its location here.</p>}
       </section>}
-      {route === "listings" && <div className="owner-dashboard-grid owner-dashboard-grid-single">
-        <section className="dashboard-panel owner-listings-panel">
       {route === "calendar" && <section className="dashboard-panel reservation-calendar-panel">
         <div className="dashboard-panel-heading">
           <div><p className="eyebrow">CONFIRMED RENTALS</p><h2>Reservation calendar</h2></div>
-          {verified && <button type="button" onClick={refreshVisibleOwnerData}>Refresh</button>}
         </div>
-        {!verified ? <p className="dashboard-empty">Reservation calendars are available after your owner account is verified.</p> : loading ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !loadError && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={calendarRenters} scope="owner" /></React.Suspense>}
+        {!verified ? <p className="dashboard-empty">Reservation calendars are available after your owner account is verified.</p> : loading ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !loadError && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={calendarRenters} scope="owner" onRefresh={refreshVisibleOwnerData} /></React.Suspense>}
       </section>}
           <div className="dashboard-panel-heading"><div><p className="eyebrow">YOUR PORTFOLIO</p><h2>Manage property listings</h2></div><span>{pendingCount} awaiting admin</span></div>
           {loading ? <p className="dashboard-empty">Loading your property listings…</p> : listings.length ? (
+      {route === "listings" && <div className="owner-dashboard-grid owner-dashboard-grid-single">
+        <section className="dashboard-panel owner-listings-panel">
             <div className="owner-listing-list">{listings.map((listing) => (
               <article className="owner-listing-row" key={listing.id}>
                 <div className={`owner-listing-thumb rental-art-${listing.property_type}`}>{listing.photo_url && <img src={propertyPhotoSource(listing)} alt="" loading="lazy" onError={(event) => { event.currentTarget.hidden = true; }} />}</div>
@@ -2175,6 +2174,15 @@ function AdminToolsScreen({ screen }) {
 
   useEffect(() => {
     let active = true;
+  const refreshCalendar = useCallback(async () => {
+    setError("");
+    try {
+      await load();
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Could not refresh reservations.");
+    }
+  }, [load]);
+
     load().catch((loadError) => {
       if (active) setError(loadError.message);
     });
@@ -2259,16 +2267,16 @@ function AdminToolsScreen({ screen }) {
     </>;
   }
 
-  if (screen === "reviews") {
-    const reviews = data?.reviews || [];
   if (screen === "calendar") {
     return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}
-      {!data && !error ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !error && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={data || []} scope="admin" /></React.Suspense>}
+      {!data && !error ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !error && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={data || []} scope="admin" onRefresh={refreshCalendar} /></React.Suspense>}
     </>;
   }
 
     const topRentals = data?.top_rentals || [];
     return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}{notice && <p className="payment-return-notice" role="status">{notice}</p>}
+  if (screen === "reviews") {
+    const reviews = data?.reviews || [];
       <section className="admin-panel admin-rating-leaderboard">
         <div className="admin-panel-heading"><div><p className="eyebrow">TENANT-APPROVED FEEDBACK</p><h2>Best-rated rentals across RentEase</h2></div><span>Ranked by average rating, then review count</span></div>
         {topRentals.length ? <div className="admin-rating-grid">{topRentals.slice(0, 3).map((rental, index) => (
