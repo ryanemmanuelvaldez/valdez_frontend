@@ -56,49 +56,73 @@ function formatMoney(centavos) {
 
 export default function ReservationCalendar({ reservations, scope, onRefresh }) {
   const [selectedReservation, setSelectedReservation] = useState(null);
-  const events = (reservations || []).flatMap((reservation) => {
+  const confirmedReservations = (reservations || []).filter((reservation) => {
     const confirmed = scope === "owner"
       ? reservation.payment_status === "paid"
       : reservation.status === "approved" && reservation.initial_payment_status === "paid";
-    if (!confirmed) return [];
+    return confirmed;
+  });
+  const events = confirmedReservations.flatMap((reservation) => {
+    const reservationDate = normalizeReservationDate(reservation.created_at);
+    const moveInDate = normalizeReservationDate(reservation.move_in);
+    const plannedMoveOutDate = reservationEndDate(reservation.move_in, reservation.move_out, reservation.term_months);
+    if (!reservationDate && !moveInDate) return [];
 
-    const start = normalizeReservationDate(reservation.move_in);
-    const end = reservationEndDate(reservation.move_in, reservation.move_out, reservation.term_months);
-    if (!start || !end || end <= start) return [];
-
+    const reservationId = String(reservation.id);
+    const rentalTitle = reservation.rental_title || "Rental";
     const tenantName = scope === "owner"
       ? reservation.display_name || reservation.tenant_name || "Tenant"
       : reservation.tenant_name || "Tenant";
     const tenancyStatus = reservation.tenancy_status === "ended" ? "Ended" : "Active";
-    return [{
-      id: String(reservation.id),
-      title: `${reservation.rental_title || "Rental"} · ${tenantName}`,
-      start,
-      end,
-      allDay: true,
-      ...(tenancyStatus === "Ended" ? { backgroundColor: "#788780", borderColor: "#788780" } : {}),
-      extendedProps: {
-        rentalTitle: reservation.rental_title || "Rental",
-        tenantName,
-        tenantEmail: scope === "admin" ? reservation.tenant_email || "" : "",
-        ownerName: scope === "admin" ? reservation.owner_name || "" : "",
-        ownerEmail: scope === "admin" ? reservation.owner_email || "" : "",
-        occupants: Number(reservation.occupants) || 0,
-        termMonths: Number(reservation.term_months) || 0,
-        tenancyStatus,
-        reservationStatus: reservation.status || "approved",
-        paymentStatus: scope === "admin"
-          ? reservation.initial_payment_status || "not recorded"
-          : reservation.payment_status || "not recorded",
-        paymentAmount: scope === "admin" ? Number(reservation.initial_payment_centavos) || 0 : 0,
-      },
-    }];
+    const sharedDetails = {
+      reservationId,
+      rentalTitle,
+      tenantName,
+      tenantEmail: scope === "admin" ? reservation.tenant_email || "" : "",
+      ownerName: scope === "admin" ? reservation.owner_name || "" : "",
+      ownerEmail: scope === "admin" ? reservation.owner_email || "" : "",
+      reservationDate,
+      moveInDate,
+      plannedMoveOutDate,
+      occupants: Number(reservation.occupants) || 0,
+      termMonths: Number(reservation.term_months) || 0,
+      tenancyStatus,
+      reservationStatus: reservation.status || "approved",
+      paymentStatus: scope === "admin"
+        ? reservation.initial_payment_status || "not recorded"
+        : reservation.payment_status || "not recorded",
+      paymentAmount: scope === "admin" ? Number(reservation.initial_payment_centavos) || 0 : 0,
+    };
+    const dateEvents = [];
+    if (reservationDate) {
+      dateEvents.push({
+        id: `${reservationId}-reserved`,
+        title: `Reserved · ${tenantName}`,
+        start: reservationDate,
+        allDay: true,
+        backgroundColor: "#6d53aa",
+        borderColor: "#6d53aa",
+        extendedProps: { ...sharedDetails, eventType: "Reservation date" },
+      });
+    }
+    if (moveInDate) {
+      dateEvents.push({
+        id: `${reservationId}-move-in`,
+        title: `Move-in · ${tenantName}`,
+        start: moveInDate,
+        allDay: true,
+        backgroundColor: "#6d53aa",
+        borderColor: "#6d53aa",
+        extendedProps: { ...sharedDetails, eventType: "Move-in date" },
+      });
+    }
+    return dateEvents;
   });
 
   return (
     <div className="reservation-calendar">
       <p className="reservation-calendar-summary">
-        {events.length} confirmed reservation{events.length === 1 ? "" : "s"}. Requests awaiting payment are not shown.
+        {confirmedReservations.length} confirmed reservation{confirmedReservations.length === 1 ? "" : "s"}. Only reservation and move-in dates are marked; requests awaiting payment are not shown.
       </p>
       <FullCalendar
         plugins={[themePlugin, dayGridPlugin, listPlugin]}
@@ -122,23 +146,21 @@ export default function ReservationCalendar({ reservations, scope, onRefresh }) 
         firstDay={0}
         fixedWeekCount
         events={events}
-        eventClick={({ event }) => setSelectedReservation({
-          id: event.id,
-          title: event.title,
-          start: event.startStr,
-          end: event.endStr,
-          ...event.extendedProps,
-        })}
+        eventClick={({ event }) => setSelectedReservation(event.extendedProps)}
         dayMaxEvents
         height="auto"
         contentHeight="auto"
       />
       {selectedReservation ? <section className="reservation-calendar-detail" aria-live="polite">
         <div className="reservation-calendar-detail-heading">
-          <div><p className="eyebrow">RESERVATION #{selectedReservation.id}</p><h3>{selectedReservation.rentalTitle}</h3></div>
+          <div><p className="eyebrow">RESERVATION #{selectedReservation.reservationId}</p><h3>{selectedReservation.rentalTitle}</h3></div>
           <button type="button" onClick={() => setSelectedReservation(null)}>Clear selection</button>
         </div>
         <div className="reservation-calendar-detail-grid">
+          <div className="reservation-calendar-detail-item">
+            <span>Selected date</span>
+            <strong>{selectedReservation.eventType} · {formatDate(selectedReservation.eventType === "Reservation date" ? selectedReservation.reservationDate : selectedReservation.moveInDate)}</strong>
+          </div>
           <div className="reservation-calendar-detail-item">
             <span>Tenant</span>
             <strong>{selectedReservation.tenantName}</strong>
@@ -151,11 +173,11 @@ export default function ReservationCalendar({ reservations, scope, onRefresh }) 
           </div>}
           <div className="reservation-calendar-detail-item">
             <span>Move-in</span>
-            <strong>{formatDate(selectedReservation.start)}</strong>
+            <strong>{formatDate(selectedReservation.moveInDate)}</strong>
           </div>
           <div className="reservation-calendar-detail-item">
             <span>Planned move-out</span>
-            <strong>{formatDate(selectedReservation.end)}</strong>
+            <strong>{formatDate(selectedReservation.plannedMoveOutDate)}</strong>
           </div>
           <div className="reservation-calendar-detail-item">
             <span>Occupants · term</span>
