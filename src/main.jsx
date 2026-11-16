@@ -585,7 +585,7 @@ function TenantDashboard({ user, route }) {
   const [error, setError] = useState("");
   const [paymentNotice, setPaymentNotice] = useState("");
   const [loading, setLoading] = useState(true);
-  const [checkoutRequestId, setCheckoutRequestId] = useState(null);
+  const [paymentSubmissionId, setPaymentSubmissionId] = useState(null);
   const [browseType, setBrowseType] = useState("");
 
   const loadDashboard = useCallback(async ({ silent = false } = {}) => {
@@ -613,98 +613,6 @@ function TenantDashboard({ user, route }) {
     loadDashboard();
   }, [loadDashboard]);
 
-  useEffect(() => {
-    const parameters = new URLSearchParams(window.location.search);
-    const returnStatus = parameters.get("payment");
-    if (!returnStatus) return undefined;
-
-    window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
-    if (returnStatus === "cancelled" || returnStatus === "failure") {
-      setPaymentNotice(returnStatus === "cancelled"
-        ? "Maya Sandbox checkout was cancelled. Your request is still available to pay."
-        : "Maya Sandbox could not complete the payment. You can try again.");
-      const requestId = parameters.get("request_id");
-      const installmentId = parameters.get("installment_id");
-      if (!requestId) return undefined;
-      let stopped = false;
-      async function verifyReturnedPayment() {
-        try {
-          const verification = await apiRequest("tenant/payments/verify-checkout", {
-            request_id: requestId,
-            ...(installmentId ? { installment_id: installmentId } : {}),
-          });
-          if (stopped) return;
-          if (verification.status === "paid") {
-            setPaymentNotice("Maya verified the payment. Your rental payment is recorded.");
-          } else if (verification.status === "failed") {
-            setPaymentNotice("Maya Sandbox reports that the payment did not complete. You can try again.");
-          }
-          await loadDashboard({ silent: true });
-        } catch (paymentError) {
-          if (!stopped) setError(paymentError.message);
-        }
-      }
-      verifyReturnedPayment();
-      return () => { stopped = true; };
-    }
-    if (returnStatus !== "success") {
-      return undefined;
-    }
-
-    setPaymentNotice("Returned from Maya Sandbox. Checking for the payment confirmation…");
-    let attempts = 0;
-    let timer;
-    let stopped = false;
-    const requestId = parameters.get("request_id");
-    const installmentId = parameters.get("installment_id");
-    if (!requestId) {
-      setPaymentNotice("The Maya Sandbox return did not include a rental request. No payment was recorded.");
-      return undefined;
-    }
-    async function checkPayment() {
-      try {
-        const verification = await apiRequest("tenant/payments/verify-checkout", {
-          request_id: requestId,
-          ...(installmentId ? { installment_id: installmentId } : {}),
-        });
-        if (verification.status === "failed") {
-          setPaymentNotice("Maya Sandbox reports that the payment did not complete. You can try again.");
-          await loadDashboard({ silent: true });
-          return;
-        }
-        const [result, scheduleResult] = await Promise.all([
-          apiRequest("tenant/payments", undefined, "GET"),
-          apiRequest("tenant/installments", undefined, "GET"),
-        ]);
-        if (stopped) return;
-        setPayments(result.payments);
-        setRentSchedule(scheduleResult);
-        const paymentConfirmed = installmentId
-          ? scheduleResult.schedule.some((installment) => String(installment.id) === installmentId && installment.status === "paid")
-          : scheduleResult.payments.some((payment) => String(payment.rental_request_id) === String(requestId))
-            || result.payments.some((payment) => String(payment.rental_request_id) === String(requestId) && payment.status === "paid");
-        if (paymentConfirmed) {
-          setPaymentNotice("Payment confirmed. Your rental is now active.");
-          await loadDashboard({ silent: true });
-          return;
-        }
-      } catch (paymentError) {
-        if (!stopped) setError(paymentError.message);
-      }
-      attempts += 1;
-      if (!stopped && attempts < 10) {
-        timer = window.setTimeout(checkPayment, 3000);
-      } else if (!stopped) {
-        setPaymentNotice("Maya Sandbox has not confirmed the payment yet. This page will not mark it paid until Maya verifies it; refresh shortly to check again.");
-      }
-    }
-    checkPayment();
-    return () => {
-      stopped = true;
-      window.clearTimeout(timer);
-    };
-  }, [loadDashboard]);
-
   const paymentsByRequest = new Map(payments.map((payment) => [String(payment.rental_request_id), payment]));
   const pendingRequests = requests.filter((request) => request.status === "pending").length;
   const approvedRequests = requests.filter((request) =>
@@ -724,32 +632,8 @@ function TenantDashboard({ user, route }) {
   };
   const [pageTitle, pageDescription] = routeTitles[route] || routeTitles.dashboard;
 
-  async function startCheckout(requestId) {
-    setCheckoutRequestId(requestId);
-    setError("");
-    try {
-      const result = await apiRequest(`tenant/requests/${requestId}/checkout`, {});
-      window.location.assign(result.checkout_url);
-    } catch (checkoutError) {
-      setError(checkoutError.message);
-      setCheckoutRequestId(null);
-    }
-  }
-
-  async function startInstallmentCheckout(installmentId) {
-    setCheckoutRequestId(`installment-${installmentId}`);
-    setError("");
-    try {
-      const result = await apiRequest(`tenant/installments/${installmentId}/checkout`, {});
-      window.location.assign(result.checkout_url);
-    } catch (checkoutError) {
-      setError(checkoutError.message);
-      setCheckoutRequestId(null);
-    }
-  }
-
   async function reportPhysicalPayment(recordType, recordId, paymentMethod, receiptFile) {
-    setCheckoutRequestId(`physical-${recordType}-${recordId}`);
+    setPaymentSubmissionId(`physical-${recordType}-${recordId}`);
     setError("");
     try {
       if (!receiptFile || receiptFile.type !== "image/jpeg" || receiptFile.size > 2 * 1024 * 1024) {
@@ -772,7 +656,7 @@ function TenantDashboard({ user, route }) {
     } catch (paymentError) {
       setError(paymentError.message);
     } finally {
-      setCheckoutRequestId(null);
+      setPaymentSubmissionId(null);
     }
   }
 
@@ -847,44 +731,37 @@ function TenantDashboard({ user, route }) {
                     <strong>₱{(Number(paymentsByRequest.get(String(request.id))?.amount_centavos || (Number(request.price) + Number(request.security_deposit || 0)) * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                     {request.initial_payment_status === "pending_owner_confirmation" ? (
                       <>
-                        <small role="status">{request.initial_payment_receipt_available ? `Your ${String(request.initial_payment_method || "wallet").toUpperCase()} receipt was submitted. Waiting for the owner to confirm it.` : "A receipt screenshot is required before the owner can confirm this transfer."}</small>
+                        <small role="status">{request.initial_payment_receipt_available ? `Your ${request.initial_payment_method === "maya" ? "legacy wallet" : String(request.initial_payment_method || "wallet")} receipt was submitted. Waiting for the owner to confirm it.` : "A receipt screenshot is required before the owner can confirm this transfer."}</small>
                         {!request.initial_payment_receipt_available && <PhysicalPaymentAction
                           gcashQr={request.owner_gcash_qr_data}
-                          mayaQr={request.owner_maya_qr_data}
                           ownerPhone={request.owner_phone}
-                          pending={checkoutRequestId === `physical-initial-${request.id}`}
+                          pending={paymentSubmissionId === `physical-initial-${request.id}`}
                           onSubmit={(method, receipt) => reportPhysicalPayment("initial", request.id, method, receipt)}
                         />}
                       </>
-                    ) : request.initial_payment_status === "pending" || request.initial_payment_status === "creating" ? (
-                      request.initial_payment_status === "pending" && request.initial_payment_checkout_url
-                        ? <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id)}>
-                            {checkoutRequestId === request.id ? "Opening checkout…" : "Continue existing checkout"}
-                          </button>
-                        : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
                     ) : (
-                      <div className="online-payment-options">
-                        <span>Maya Checkout Sandbox</span>
-                        <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id)}>Continue to Maya Checkout</button>
-                      </div>
+                      <>
+                        {["pending", "creating"].includes(request.initial_payment_status) && <small role="status">A previous payment attempt is unconfirmed. Submit a GCash or cash receipt here for the owner to review.</small>}
+                        <small>First month rent + security deposit. The owner confirms every submitted receipt before the rental is activated.</small>
+                      </>
                     )}
-                    <small>First month rent + deposit · Choose an enabled method on Maya Checkout; GCash/Maya availability depends on the Sandbox account. No real charge is made.</small>
-                    {!["pending_owner_confirmation", "pending", "creating"].includes(request.initial_payment_status) && <PhysicalPaymentAction
-                      gcashQr={request.owner_gcash_qr_data}
-                      mayaQr={request.owner_maya_qr_data}
-                      ownerPhone={request.owner_phone}
-                      pending={checkoutRequestId === `physical-initial-${request.id}`}
-                      onSubmit={(method, receipt) => reportPhysicalPayment("initial", request.id, method, receipt)}
-                    />}
-                    {!["pending_owner_confirmation", "pending", "creating"].includes(request.initial_payment_status) && <CashPaymentReceiptAction
-                      pending={checkoutRequestId === `physical-initial-${request.id}`}
-                      onSubmit={(receipt) => reportPhysicalPayment("initial", request.id, "cash", receipt)}
-                    />}
+                    {request.initial_payment_status !== "pending_owner_confirmation" && <>
+                      <PhysicalPaymentAction
+                        gcashQr={request.owner_gcash_qr_data}
+                        ownerPhone={request.owner_phone}
+                        pending={paymentSubmissionId === `physical-initial-${request.id}`}
+                        onSubmit={(method, receipt) => reportPhysicalPayment("initial", request.id, method, receipt)}
+                      />
+                      <CashPaymentReceiptAction
+                        pending={paymentSubmissionId === `physical-initial-${request.id}`}
+                        onSubmit={(receipt) => reportPhysicalPayment("initial", request.id, "cash", receipt)}
+                      />
+                    </>}
                   </div>
                 )}
                 {paymentsByRequest.get(String(request.id))?.status === "paid" && <small>Payment confirmed {formatDate(paymentsByRequest.get(String(request.id)).paid_at)}</small>}
                 {paymentsByRequest.get(String(request.id))?.owner_confirmed && <p className="tenant-owner-confirmation" role="status"><strong>Payment confirmed by the owner.</strong> Your payment has been received and recorded.</p>}
-                {request.status === "approved" && paymentsByRequest.get(String(request.id))?.status !== "paid" && <small>Approved before online payments were enabled. Contact the owner to confirm your existing payment.</small>}
+                {request.status === "approved" && paymentsByRequest.get(String(request.id))?.status !== "paid" && <small>This approved rental has no confirmed first payment on file. Contact the owner if you need help.</small>}
                 {request.status === "approved" && !request.review && <form className="tenant-review-form" onSubmit={(event) => submitReview(event, request.id)}>
                   <label>Rate your stay<select name="rating" defaultValue="5"><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label>
                   <label>Your review<textarea name="body" minLength={10} maxLength={3000} required placeholder="Share your experience with this rental…" /></label>
@@ -900,35 +777,27 @@ function TenantDashboard({ user, route }) {
         rentSchedule={rentSchedule}
         loading={loading}
         error={error}
-        checkoutRequestId={checkoutRequestId}
-        onCheckout={startInstallmentCheckout}
+        paymentSubmissionId={paymentSubmissionId}
         onPhysicalPayment={(id, method, receipt) => reportPhysicalPayment("installment", id, method, receipt)}
       />}
     </>
   );
 }
 
-function PhysicalPaymentAction({ gcashQr, mayaQr, ownerPhone, pending, advancePayment = false, onSubmit }) {
-  const [selectedWallet, setSelectedWallet] = useState(gcashQr ? "gcash" : mayaQr ? "maya" : "gcash");
+function PhysicalPaymentAction({ gcashQr, ownerPhone, pending, advancePayment = false, onSubmit }) {
   const [receiptFile, setReceiptFile] = useState(null);
   const [advanceTermsAccepted, setAdvanceTermsAccepted] = useState(false);
-  const wallet = selectedWallet;
-  const qr = wallet === "gcash" ? gcashQr : mayaQr;
-  const available = Boolean(gcashQr || mayaQr || ownerPhone);
+  const available = Boolean(gcashQr || ownerPhone);
   const canSubmit = !pending && Boolean(receiptFile) && (!advancePayment || advanceTermsAccepted);
 
   return (
     <details className="physical-payment-action">
-      <summary>{advancePayment ? "Make an advance payment directly to the owner" : "Pay the owner directly with GCash/Maya"}</summary>
+      <summary>{advancePayment ? "Make an advance GCash payment directly to the owner" : "Pay the owner directly with GCash"}</summary>
       {!available ? <p className="dashboard-empty">The owner has not shared a wallet QR or mobile payment number yet. Ask the owner to set it up.</p> : (
         <div className="physical-payment-content">
-          <div className="wallet-choice">
-            {(gcashQr || ownerPhone) && <button type="button" className={wallet === "gcash" ? "active" : ""} onClick={() => setSelectedWallet("gcash")}>GCash</button>}
-            {(mayaQr || ownerPhone) && <button type="button" className={wallet === "maya" ? "active" : ""} onClick={() => setSelectedWallet("maya")}>Maya</button>}
-          </div>
-          {qr && <img className="wallet-qr-image" src={qr} alt={`Owner's official ${wallet === "gcash" ? "GCash" : "Maya"} QR code`} />}
-          {ownerPhone && <p className="owner-payment-number"><strong>{wallet === "gcash" ? "GCash" : "Maya"} number:</strong> {ownerPhone}</p>}
-          <label>Payment receipt screenshot (required, JPG/JPEG only)<input type="file" accept="image/jpeg,.jpg,.jpeg" required onChange={(event) => setReceiptFile(event.target.files?.[0] || null)} /><small>Upload a clear screenshot from your GCash or Maya payment receipt, up to 2 MB.</small></label>
+          {gcashQr && <img className="wallet-qr-image" src={gcashQr} alt="Owner's official GCash QR code" />}
+          {ownerPhone && <p className="owner-payment-number"><strong>GCash number:</strong> {ownerPhone}</p>}
+          <label>Payment receipt screenshot (required, JPG/JPEG only)<input type="file" accept="image/jpeg,.jpg,.jpeg" required onChange={(event) => setReceiptFile(event.target.files?.[0] || null)} /><small>Upload a clear screenshot of your GCash payment receipt, up to 2 MB.</small></label>
           {advancePayment && (
             <label className="advance-payment-confirmation">
               <input type="checkbox" checked={advanceTermsAccepted} onChange={(event) => setAdvanceTermsAccepted(event.target.checked)} />
@@ -936,7 +805,7 @@ function PhysicalPaymentAction({ gcashQr, mayaQr, ownerPhone, pending, advancePa
             </label>
           )}
           <p>Use the owner's QR or mobile number in your wallet app. After paying, upload the receipt screenshot; the owner must review and confirm it before the rental is marked rented or the installment is marked paid.</p>
-          <button type="button" disabled={!canSubmit} onClick={() => onSubmit(wallet, receiptFile)}>{pending ? "Sending report…" : `${advancePayment ? "I made an advance payment" : "I paid"} with ${wallet === "gcash" ? "GCash" : "Maya"}`}</button>
+          <button type="button" disabled={!canSubmit} onClick={() => onSubmit("gcash", receiptFile)}>{pending ? "Sending report…" : `${advancePayment ? "I made an advance payment" : "I paid"} with GCash`}</button>
         </div>
       )}
     </details>
@@ -1005,12 +874,13 @@ function RentNotificationFeed({ accountType }) {
   );
 }
 
-function TenantRentPayments({ rentSchedule, loading, error, checkoutRequestId, onCheckout, onPhysicalPayment }) {
-  const unpaid = rentSchedule.schedule.filter((installment) => installment.status !== "paid" && installment.due_date <= localDateInputValue());
+function TenantRentPayments({ rentSchedule, loading, error, paymentSubmissionId, onPhysicalPayment }) {
+  const unpaidInstallments = rentSchedule.schedule.filter((installment) => installment.status !== "paid");
+  const dueInstallments = unpaidInstallments.filter((installment) => installment.due_date <= localDateInputValue());
   return (
     <div className="tenant-payment-page">
       <div className="dashboard-stat-grid">
-        <article className="dashboard-stat"><span>Total currently due</span><strong>₱{(Number(rentSchedule.summary.due_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong><small>{unpaid.length} unpaid installment{unpaid.length === 1 ? "" : "s"}</small></article>
+        <article className="dashboard-stat"><span>Total currently due</span><strong>₱{(Number(rentSchedule.summary.due_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong><small>{dueInstallments.length} unpaid installment{dueInstallments.length === 1 ? "" : "s"}</small></article>
         <article className="dashboard-stat"><span>Total outstanding</span><strong>₱{(Number(rentSchedule.summary.outstanding_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong><small>Includes upcoming rent that can be paid early</small></article>
         <article className="dashboard-stat"><span>Total payments recorded</span><strong>₱{(Number(rentSchedule.summary.paid_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong><small>Rent and move-in payments confirmed</small></article>
         <article className="dashboard-stat"><span>Next rent date</span><strong>{formatDate(rentSchedule.schedule.find((item) => item.status !== "paid")?.due_date)}</strong><small>Based on your rental agreement</small></article>
@@ -1018,67 +888,55 @@ function TenantRentPayments({ rentSchedule, loading, error, checkoutRequestId, o
       </div>
       {error && <p className="dashboard-empty" role="alert">{error}</p>}
       <section className="dashboard-panel">
-        <div className="dashboard-panel-heading"><div><p className="eyebrow">RENT PLAN</p><h2>Due dates & installments</h2></div></div>
-        {loading ? <p className="dashboard-empty">Loading your rent schedule…</p> : rentSchedule.schedule.length ? (
-          <div className="tenant-payment-list">{rentSchedule.schedule.map((installment) => (
+        <div className="dashboard-panel-heading"><div><p className="eyebrow">RENT PLAN</p><h2>Due & upcoming installments</h2></div><span>{unpaidInstallments.length} remaining</span></div>
+        {loading ? <p className="dashboard-empty">Loading your rent schedule…</p> : unpaidInstallments.length ? (
+          <div className="tenant-payment-list">{unpaidInstallments.map((installment) => (
             <article className="tenant-payment-row" key={installment.id}>
               <div><strong>{installment.rental_title}</strong><span>Installment #{installment.installment_number} · Due {formatDate(installment.due_date)}</span>
                 {Number(installment.installment_number) === 1 && <small>Initial rent and security deposit{installment.payment_method ? "" : " (move-in payment)"}</small>}
               </div>
               <strong>₱{(Number(installment.amount_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
-              <span className={`listing-state listing-${installment.status}`}>{installment.status === "upcoming" ? "Upcoming" : installment.status === "overdue" ? "Overdue" : installment.status === "paid" ? "Paid" : installment.status === "pending_owner_confirmation" ? "Owner confirmation" : installment.status === "pending" ? "Checkout started" : installment.status === "creating" ? "Preparing checkout" : "Due"}</span>
-              {installment.owner_confirmed && <p className="tenant-owner-confirmation" role="status"><strong>Owner confirmed your payment.</strong> This installment has been marked as received.</p>}
+              <span className={`listing-state listing-${["pending", "creating"].includes(installment.status) ? "due" : installment.status}`}>{installment.status === "upcoming" ? "Upcoming" : installment.status === "overdue" ? "Overdue" : installment.status === "pending_owner_confirmation" ? "Owner confirmation" : "Due"}</span>
               {installment.status === "pending_owner_confirmation" && <>
                 <small role="status">{installment.receipt_available ? "Your receipt was submitted. Waiting for owner confirmation." : "A receipt screenshot is required before the owner can confirm this transfer."}</small>
                 {!installment.receipt_available && <PhysicalPaymentAction
                   gcashQr={installment.owner_gcash_qr_data}
-                  mayaQr={installment.owner_maya_qr_data}
                   ownerPhone={installment.owner_phone}
-                  pending={checkoutRequestId === `physical-installment-${installment.id}`}
+                  pending={paymentSubmissionId === `physical-installment-${installment.id}`}
                   onSubmit={(method, receipt) => onPhysicalPayment(installment.id, method, receipt)}
                 />}
               </>}
-              {["pending", "creating"].includes(installment.status) && (
-                installment.status === "pending" && installment.checkout_url
-                  ? <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id)}>{checkoutRequestId === `installment-${installment.id}` ? "Opening…" : "Continue existing checkout"}</button>
-                  : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
-              )}
-              {["due", "overdue", "upcoming"].includes(installment.status) && <div className="online-payment-options">
-                <span>Maya Checkout Sandbox</span>
-                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id)}>{installment.status === "upcoming" ? "Advance pay · Maya Checkout" : "Continue to Maya Checkout"}</button>
-              </div>}
-              {["due", "overdue", "upcoming"].includes(installment.status) && <small>GCash/Maya options appear if enabled for this Sandbox account; no real charge is made.</small>}
-              {["due", "overdue", "upcoming"].includes(installment.status) && <>
+              {["pending", "creating"].includes(installment.status) && <small role="status">A previous payment attempt is unconfirmed. Submit a GCash or cash receipt here for the owner to review.</small>}
+              {["due", "overdue", "upcoming", "pending", "creating"].includes(installment.status) && <>
                 <PhysicalPaymentAction
                   gcashQr={installment.owner_gcash_qr_data}
-                  mayaQr={installment.owner_maya_qr_data}
                   ownerPhone={installment.owner_phone}
-                  pending={checkoutRequestId === `physical-installment-${installment.id}`}
+                  pending={paymentSubmissionId === `physical-installment-${installment.id}`}
                   advancePayment={installment.status === "upcoming"}
                   onSubmit={(method, receipt) => onPhysicalPayment(installment.id, method, receipt)}
                 />
-                {["due", "overdue", "upcoming"].includes(installment.status) && <CashPaymentReceiptAction
+                <CashPaymentReceiptAction
                     advancePayment={installment.status === "upcoming"}
-                    pending={checkoutRequestId === `physical-installment-${installment.id}`}
+                    pending={paymentSubmissionId === `physical-installment-${installment.id}`}
                     onSubmit={(receipt) => onPhysicalPayment(installment.id, "cash", receipt)}
-                  />}
+                  />
               </>}
             </article>
           ))}</div>
-        ) : <p className="dashboard-empty">A rent schedule appears after a rental is approved. Requests still awaiting owner approval are shown on My requests.</p>}
+        ) : <p className="dashboard-empty">No unpaid or upcoming installments. Approved rental requests will appear here when payments are due.</p>}
       </section>
       <section className="dashboard-panel">
-        <div className="dashboard-panel-heading"><div><p className="eyebrow">PAYMENT HISTORY</p><h2>Past payments</h2></div><span>{rentSchedule.payments.length} recorded</span></div>
+        <div className="dashboard-panel-heading"><div><p className="eyebrow">PAYMENT HISTORY</p><h2>Paid payments</h2></div><span>{rentSchedule.payments.length} recorded</span></div>
         {loading ? <p className="dashboard-empty">Loading payment history…</p> : rentSchedule.payments.length ? (
           <div className="tenant-payment-list">{rentSchedule.payments.map((payment) => (
             <article className="tenant-payment-row" key={payment.id}>
-              <div><strong>{payment.rental_title}</strong><span>{payment.description} · {formatDate(payment.paid_at)}</span><small>{payment.payment_method || "Payment"}{payment.reference_number ? ` · ${payment.reference_number}` : ""}</small></div>
+              <div><strong>{payment.rental_title}</strong><span>{payment.description} · {formatDate(payment.paid_at)}</span><small>{payment.payment_method === "maya" ? "Legacy wallet" : payment.payment_method || "Payment"}{payment.reference_number ? ` · ${payment.reference_number}` : ""}</small></div>
               <strong>₱{(Number(payment.amount_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
               <span className="listing-state listing-approved">Paid</span>
               {payment.owner_confirmed && <p className="tenant-owner-confirmation" role="status"><strong>Confirmed by your owner.</strong> This payment was acknowledged as received.</p>}
             </article>
           ))}</div>
-        ) : <p className="dashboard-empty">No payments have been recorded yet. Confirmed checkout payments will appear here.</p>}
+        ) : <p className="dashboard-empty">No payments have been confirmed yet. Confirmed payments will appear here.</p>}
       </section>
     </div>
   );
@@ -1459,7 +1317,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
   const [ownerRatings, setOwnerRatings] = useState([]);
   const [verificationDocuments, setVerificationDocuments] = useState([]);
   const [incomeAnalytics, setIncomeAnalytics] = useState(null);
-  const [ownerQrProfile, setOwnerQrProfile] = useState({ gcash_qr_data: null, maya_qr_data: null, owner_phone: user.phone || "" });
+  const [ownerQrProfile, setOwnerQrProfile] = useState({ gcash_qr_data: null, owner_phone: user.phone || "" });
   const [verificationStatus, setVerificationStatus] = useState(user.owner_status);
   const [message, setMessage] = useState("");
   const [messageIsError, setMessageIsError] = useState(false);
@@ -1517,7 +1375,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       if (key === "documents") setVerificationDocuments(result.value.documents || []);
       if (key === "payments") {
         setOwnerPayments(result.value.payments || []);
-        setOwnerQrProfile(result.value.profile || { gcash_qr_data: null, maya_qr_data: null, owner_phone: user.phone || "" });
+        setOwnerQrProfile(result.value.profile || { gcash_qr_data: null, owner_phone: user.phone || "" });
       }
       if (key === "income") setIncomeAnalytics(result.value.income || null);
       if (key === "sales") setSalesAnalytics(result.value.sales || null);
@@ -1545,7 +1403,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
           apiRequest("owner/income", undefined, "GET"),
         ]);
         setOwnerPayments(paymentResult.payments || []);
-        setOwnerQrProfile(paymentResult.profile || { gcash_qr_data: null, maya_qr_data: null, owner_phone: user.phone || "" });
+        setOwnerQrProfile(paymentResult.profile || { gcash_qr_data: null, owner_phone: user.phone || "" });
         setIncomeAnalytics(incomeResult.income || null);
       }
       setLoadError("");
@@ -1741,13 +1599,9 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     setMessage("");
     setMessageIsError(false);
     try {
-      const [gcashQr, mayaQr] = await Promise.all([
-        readQrFile(fields.get("gcash_qr_file"), ownerQrProfile.gcash_qr_data),
-        readQrFile(fields.get("maya_qr_file"), ownerQrProfile.maya_qr_data),
-      ]);
+      const gcashQr = await readQrFile(fields.get("gcash_qr_file"), ownerQrProfile.gcash_qr_data);
       const result = await apiRequest("owner/payment-profile", {
         gcash_qr_data: gcashQr,
-        maya_qr_data: mayaQr,
       });
       setMessage(result.message);
       await loadWorkspace();
@@ -1774,7 +1628,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     requests: ["Rental applications", "Review tenant requests and follow each payment confirmation."],
     calendar: ["Reservation calendar", "See confirmed move-in dates and rental terms across your properties."],
     renters: ["Monitor renters", "Track each tenant's rental, contact details, payment balance, and tenancy status."],
-    payments: ["Rent payments & wallet QR", "Set up your own GCash/Maya QR and manage tenant wallet transfers or cash payments."],
+    payments: ["Rent payments & GCash QR", "Set up your GCash QR and manage tenant receipt reports and cash payments."],
     sales: ["My rental sales", "See only the confirmed rental income connected to your properties."],
   };
   const [pageTitle, pageDescription] = routeTitles[route] || routeTitles.dashboard;
@@ -1883,11 +1737,11 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
                   <button type="button" disabled={pending} onClick={() => reviewRentalRequest(request.id, "decline")}>Decline</button>
                 </div>}
                 {request.status === "pending" && !verified && <small>Verify your owner account to respond to rental requests.</small>}
-                {request.status === "awaiting_payment" && request.payment_status === "pending_owner_confirmation" && <small>The tenant reported a {String(request.payment_method || "wallet").toUpperCase()} payment{request.payment_receipt_available ? " and uploaded a receipt" : ""}. Review it in <a href="#owner/payments">Payments</a> and confirm it to activate the rental.</small>}
+                {request.status === "awaiting_payment" && request.payment_status === "pending_owner_confirmation" && <small>The tenant reported a {request.payment_method === "maya" ? "legacy wallet" : String(request.payment_method || "wallet")} payment{request.payment_receipt_available ? " and uploaded a receipt" : ""}. Review it in <a href="#owner/payments">Payments</a> and confirm it to activate the rental.</small>}
                 {request.status === "awaiting_payment" && request.payment_status === "paid" && <small>Payment confirmed{request.payment_paid_at ? ` on ${formatDate(request.payment_paid_at)}` : ""}. The rental is active.</small>}
                 {request.status === "awaiting_payment" && !["pending_owner_confirmation", "paid"].includes(request.payment_status) && <small>Waiting for the tenant to complete the first rent and deposit payment.</small>}
                 {request.status === "approved" && request.payment_status === "paid" && <small>Tenant payment confirmed. This rental is active.</small>}
-                {request.status === "approved" && request.payment_status !== "paid" && <small>Legacy approval; no online payment record is available.</small>}
+                {request.status === "approved" && request.payment_status !== "paid" && <small>Legacy approval; no confirmed payment record is available.</small>}
               </article>
             ))}</div>
           ) : <p className="dashboard-empty">No rental requests are waiting. Requests from tenants will appear here.</p>}
@@ -1970,15 +1824,13 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       {route === "payments" && !verified && <section className="dashboard-panel"><p className="dashboard-empty">Verify your owner account before setting up wallet QR codes or managing rent payments.</p></section>}
       {route === "payments" && verified && <div className="owner-dashboard-grid owner-dashboard-grid-single owner-payment-workspace">
         <section className="dashboard-panel">
-          <div className="dashboard-panel-heading"><div><p className="eyebrow">PHYSICAL WALLET PAYMENTS</p><h2>Your GCash & Maya QR codes</h2></div></div>
-          <p>Generate or download your official QR in the GCash or Maya app, then save it here. Tenants can use your saved QR or your account mobile number and report the transfer. Never upload a QR containing a wallet PIN or login code.</p>
+          <div className="dashboard-panel-heading"><div><p className="eyebrow">MANUAL PAYMENTS</p><h2>Your GCash QR code</h2></div></div>
+          <p>Generate or download your official QR in the GCash app, then save it here. Tenants can use your saved QR or your account mobile number and submit a receipt for your approval. Never upload a QR containing a wallet PIN or login code.</p>
           <p>Your RentEase account mobile number <strong>{user.phone || "has not been added"}</strong> can also be used as your payment number. Update it through support if it is incorrect.</p>
           <form className="owner-qr-form" onSubmit={saveOwnerQr}>
             <label>Owner-generated GCash QR<input type="file" name="gcash_qr_file" accept="image/png,image/jpeg,image/webp" /><small>Generate/download your official QR in GCash, then upload it here (PNG/JPG/WebP; max 1 MB).</small></label>
             {ownerQrProfile.gcash_qr_data && <img className="wallet-qr-image" src={ownerQrProfile.gcash_qr_data} alt="Saved GCash QR" />}
-            <label>Owner-generated Maya QR<input type="file" name="maya_qr_file" accept="image/png,image/jpeg,image/webp" /><small>Generate/download your official QR in Maya, then upload it here (PNG/JPG/WebP; max 1 MB).</small></label>
-            {ownerQrProfile.maya_qr_data && <img className="wallet-qr-image" src={ownerQrProfile.maya_qr_data} alt="Saved Maya QR" />}
-            <button type="submit" disabled={pending}>{pending ? "Saving…" : "Save my QR codes"}</button>
+            <button type="submit" disabled={pending}>{pending ? "Saving…" : "Save my GCash QR"}</button>
           </form>
           <p className="owner-qr-tenant-note">Only you can add or replace these QR codes. Tenants can use your saved QR or account mobile number to pay; they cannot create or edit them.</p>
         </section>
@@ -1988,11 +1840,14 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
             <div className="owner-rental-requests">{ownerPayments.filter((payment) => payment.status !== "paid").map((payment) => {
               const awaitingOwnerConfirmation = payment.status === "pending_owner_confirmation";
               const canRecordCash = ["awaiting_payment", "due", "overdue", "upcoming", "failed"].includes(payment.status);
+              const paymentMethodLabel = payment.payment_method === "maya"
+                ? "Legacy wallet"
+                : String(payment.payment_method || "payment");
               return <article className="owner-request-card" key={`${payment.record_type}-${payment.record_id}`}>
-                <div className="owner-request-heading"><strong>{payment.tenant_name}</strong><span className={`listing-state listing-${payment.status}`}>{payment.status === "pending_owner_confirmation" ? `${String(payment.payment_method || "payment").toUpperCase()} receipt to confirm` : payment.status === "awaiting_payment" ? "Move-in payment due" : payment.status}</span></div>
+                <div className="owner-request-heading"><strong>{payment.tenant_name}</strong><span className={`listing-state listing-${payment.status}`}>{payment.status === "pending_owner_confirmation" ? `${paymentMethodLabel} receipt to confirm` : payment.status === "awaiting_payment" ? "Move-in payment due" : payment.status}</span></div>
                 <p>{payment.rental_title}{payment.installment_number ? ` · Installment #${payment.installment_number}` : " · First month + deposit"}</p>
                 <small>₱{(Number(payment.amount_centavos) / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}{payment.due_date ? ` · Due ${formatDate(payment.due_date)}` : ""}</small>
-                {payment.payment_method && <small>Method: {String(payment.payment_method).toUpperCase()}</small>}
+                {payment.payment_method && <small>Method: {paymentMethodLabel}</small>}
                 {payment.status === "pending_owner_confirmation" && payment.receipt_available && <a href={`${API_BASE}/owner/payments/${payment.record_id}/receipt?record_type=${payment.record_type}`} target="_blank" rel="noreferrer">View JPG payment receipt</a>}
                 {awaitingOwnerConfirmation && (payment.receipt_available ? <div className="owner-request-actions">
                   <button type="button" disabled={pending} onClick={() => {
@@ -2002,7 +1857,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
                   <button type="button" disabled={pending} onClick={() => settlePayment(payment, "reject")}>Reject report</button>
                 </div> : <small role="status">Waiting for the tenant to upload a valid JPG receipt before you can confirm.</small>)}
                 {canRecordCash && !awaitingOwnerConfirmation && <small className="cash-receipt-required" role="status">Cash cannot be recorded here without proof. Ask the tenant to submit a JPG cash receipt from their payment page; review it here before confirming receipt.</small>}
-                {["pending", "creating"].includes(payment.status) && <small>Online checkout is still in progress; cash settlement is disabled to avoid duplicate payments.</small>}
+                {["pending", "creating"].includes(payment.status) && <small>An earlier payment attempt is unconfirmed. The tenant can submit a GCash or cash receipt for your review.</small>}
               </article>;
             })}</div>
           ) : <p className="dashboard-empty">No unpaid tenant payments are available to manage yet.</p>}
