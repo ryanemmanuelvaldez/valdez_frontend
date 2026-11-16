@@ -497,18 +497,59 @@ function TenantDashboard({ user, route }) {
     if (!returnStatus) return undefined;
 
     window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
-    if (returnStatus === "cancelled") {
-      setPaymentNotice("Checkout was cancelled. Your request is still available to pay.");
+    if (returnStatus === "cancelled" || returnStatus === "failure") {
+      setPaymentNotice(returnStatus === "cancelled"
+        ? "Maya Sandbox checkout was cancelled. Your request is still available to pay."
+        : "Maya Sandbox could not complete the payment. You can try again.");
+      const requestId = parameters.get("request_id");
+      const installmentId = parameters.get("installment_id");
+      if (!requestId) return undefined;
+      let stopped = false;
+      async function verifyReturnedPayment() {
+        try {
+          const verification = await apiRequest("tenant/payments/verify-checkout", {
+            request_id: requestId,
+            ...(installmentId ? { installment_id: installmentId } : {}),
+          });
+          if (stopped) return;
+          if (verification.status === "paid") {
+            setPaymentNotice("Maya verified the payment. Your rental payment is recorded.");
+          } else if (verification.status === "failed") {
+            setPaymentNotice("Maya Sandbox reports that the payment did not complete. You can try again.");
+          }
+          await loadDashboard({ silent: true });
+        } catch (paymentError) {
+          if (!stopped) setError(paymentError.message);
+        }
+      }
+      verifyReturnedPayment();
+      return () => { stopped = true; };
+    }
+    if (returnStatus !== "success") {
       return undefined;
     }
-    if (returnStatus !== "success") return undefined;
 
-    setPaymentNotice("Returned from Xendit. Checking for the payment confirmation…");
+    setPaymentNotice("Returned from Maya Sandbox. Checking for the payment confirmation…");
     let attempts = 0;
     let timer;
     let stopped = false;
+    const requestId = parameters.get("request_id");
+    const installmentId = parameters.get("installment_id");
+    if (!requestId) {
+      setPaymentNotice("The Maya Sandbox return did not include a rental request. No payment was recorded.");
+      return undefined;
+    }
     async function checkPayment() {
       try {
+        const verification = await apiRequest("tenant/payments/verify-checkout", {
+          request_id: requestId,
+          ...(installmentId ? { installment_id: installmentId } : {}),
+        });
+        if (verification.status === "failed") {
+          setPaymentNotice("Maya Sandbox reports that the payment did not complete. You can try again.");
+          await loadDashboard({ silent: true });
+          return;
+        }
         const [result, scheduleResult] = await Promise.all([
           apiRequest("tenant/payments", undefined, "GET"),
           apiRequest("tenant/installments", undefined, "GET"),
@@ -516,8 +557,6 @@ function TenantDashboard({ user, route }) {
         if (stopped) return;
         setPayments(result.payments);
         setRentSchedule(scheduleResult);
-        const requestId = parameters.get("request_id");
-        const installmentId = parameters.get("installment_id");
         const paymentConfirmed = installmentId
           ? scheduleResult.schedule.some((installment) => String(installment.id) === installmentId && installment.status === "paid")
           : scheduleResult.payments.some((payment) => String(payment.rental_request_id) === String(requestId))
@@ -534,7 +573,7 @@ function TenantDashboard({ user, route }) {
       if (!stopped && attempts < 10) {
         timer = window.setTimeout(checkPayment, 3000);
       } else if (!stopped) {
-        setPaymentNotice("Payment confirmation is still pending. This page will not mark the request paid until Xendit confirms it; refresh shortly to check again.");
+        setPaymentNotice("Maya Sandbox has not confirmed the payment yet. This page will not mark it paid until Maya verifies it; refresh shortly to check again.");
       }
     }
     checkPayment();
@@ -563,11 +602,11 @@ function TenantDashboard({ user, route }) {
   };
   const [pageTitle, pageDescription] = routeTitles[route] || routeTitles.dashboard;
 
-  async function startCheckout(requestId, paymentMethod) {
+  async function startCheckout(requestId) {
     setCheckoutRequestId(requestId);
     setError("");
     try {
-      const result = await apiRequest(`tenant/requests/${requestId}/checkout`, { payment_method: paymentMethod });
+      const result = await apiRequest(`tenant/requests/${requestId}/checkout`, {});
       window.location.assign(result.checkout_url);
     } catch (checkoutError) {
       setError(checkoutError.message);
@@ -575,11 +614,11 @@ function TenantDashboard({ user, route }) {
     }
   }
 
-  async function startInstallmentCheckout(installmentId, paymentMethod) {
+  async function startInstallmentCheckout(installmentId) {
     setCheckoutRequestId(`installment-${installmentId}`);
     setError("");
     try {
-      const result = await apiRequest(`tenant/installments/${installmentId}/checkout`, { payment_method: paymentMethod });
+      const result = await apiRequest(`tenant/installments/${installmentId}/checkout`, {});
       window.location.assign(result.checkout_url);
     } catch (checkoutError) {
       setError(checkoutError.message);
@@ -697,18 +736,17 @@ function TenantDashboard({ user, route }) {
                       </>
                     ) : request.initial_payment_status === "pending" || request.initial_payment_status === "creating" ? (
                       request.initial_payment_status === "pending" && request.initial_payment_checkout_url
-                        ? <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, request.initial_payment_method || "gcash")}>
-                            {checkoutRequestId === request.id ? "Opening checkout…" : `Continue existing ${String(request.initial_payment_method || "GCash").toUpperCase()} checkout`}
+                        ? <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id)}>
+                            {checkoutRequestId === request.id ? "Opening checkout…" : "Continue existing checkout"}
                           </button>
                         : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
                     ) : (
                       <div className="online-payment-options">
-                        <span>Online checkout with Xendit</span>
-                        <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, "gcash")}>GCash</button>
-                        <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id, "maya")}>Maya</button>
+                        <span>Maya Checkout Sandbox</span>
+                        <button type="button" disabled={checkoutRequestId === request.id} onClick={() => startCheckout(request.id)}>Continue to Maya Checkout</button>
                       </div>
                     )}
-                    <small>First month rent + deposit · Online payments may have provider fees. Direct wallet transfers may avoid gateway fees; wallet fees may still apply.</small>
+                    <small>First month rent + deposit · Choose an enabled method on Maya Checkout; GCash/Maya availability depends on the Sandbox account. No real charge is made.</small>
                     {!["pending_owner_confirmation", "pending", "creating"].includes(request.initial_payment_status) && <PhysicalPaymentAction
                       gcashQr={request.owner_gcash_qr_data}
                       mayaQr={request.owner_maya_qr_data}
@@ -880,14 +918,14 @@ function TenantRentPayments({ rentSchedule, loading, error, checkoutRequestId, o
               </>}
               {["pending", "creating"].includes(installment.status) && (
                 installment.status === "pending" && installment.checkout_url
-                  ? <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, installment.payment_method || "gcash")}>{checkoutRequestId === `installment-${installment.id}` ? "Opening…" : `Continue existing ${String(installment.payment_method || "GCash").toUpperCase()} checkout`}</button>
+                  ? <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id)}>{checkoutRequestId === `installment-${installment.id}` ? "Opening…" : "Continue existing checkout"}</button>
                   : <small role="status">An older online checkout is still being prepared. Contact the owner before paying another way to avoid a duplicate payment.</small>
               )}
               {["due", "overdue", "upcoming"].includes(installment.status) && <div className="online-payment-options">
-                <span>Online checkout with Xendit</span>
-                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "gcash")}>{installment.status === "upcoming" ? "Advance pay · GCash" : "GCash"}</button>
-                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id, "maya")}>{installment.status === "upcoming" ? "Advance pay · Maya" : "Maya"}</button>
+                <span>Maya Checkout Sandbox</span>
+                <button type="button" disabled={checkoutRequestId === `installment-${installment.id}`} onClick={() => onCheckout(installment.id)}>{installment.status === "upcoming" ? "Advance pay · Maya Checkout" : "Continue to Maya Checkout"}</button>
               </div>}
+              {["due", "overdue", "upcoming"].includes(installment.status) && <small>GCash/Maya options appear if enabled for this Sandbox account; no real charge is made.</small>}
               {["due", "overdue", "upcoming"].includes(installment.status) && <>
                 <PhysicalPaymentAction
                   gcashQr={installment.owner_gcash_qr_data}
@@ -1827,7 +1865,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
                   <button type="button" disabled={pending} onClick={() => settlePayment(payment, "reject")}>Reject report</button>
                 </div> : <small role="status">Waiting for the tenant to upload a valid JPG receipt before you can confirm.</small>)}
                 {canRecordCash && !awaitingOwnerConfirmation && <small className="cash-receipt-required" role="status">Cash cannot be recorded here without proof. Ask the tenant to submit a JPG cash receipt from their payment page; review it here before confirming receipt.</small>}
-                {["pending", "creating"].includes(payment.status) && <small>Online Xendit checkout is still in progress; cash settlement is disabled to avoid duplicate charges.</small>}
+                {["pending", "creating"].includes(payment.status) && <small>Online checkout is still in progress; cash settlement is disabled to avoid duplicate payments.</small>}
               </article>;
             })}</div>
           ) : <p className="dashboard-empty">No unpaid tenant payments are available to manage yet.</p>}
