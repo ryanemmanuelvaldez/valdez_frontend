@@ -470,8 +470,6 @@ function NavIcon({ name }) {
 }
 
 function AccountScreen({ user, onLogout, onUserUpdate, pending, route }) {
-  if (user.role === "admin") {
-    return <AdminWorkspace user={user} onLogout={onLogout} pending={pending} route={route} />;
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const sidebarRef = useRef(null);
@@ -480,6 +478,8 @@ function AccountScreen({ user, onLogout, onUserUpdate, pending, route }) {
     setMobileNavOpen(false);
   }, [route]);
 
+  if (user.role === "admin") {
+    return <AdminWorkspace user={user} onLogout={onLogout} pending={pending} route={route} />;
   }
 
   const accountType = user.account_type === "owner" ? "owner" : "tenant";
