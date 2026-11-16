@@ -43,6 +43,17 @@ function formatDate(value) {
   });
 }
 
+function formatStatus(value) {
+  const status = String(value || "not recorded").replace(/_/g, " ");
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function formatMoney(centavos) {
+  const amount = Number(centavos);
+  if (!Number.isFinite(amount) || amount <= 0) return "—";
+  return `₱${(amount / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export default function ReservationCalendar({ reservations, scope, onRefresh }) {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const events = (reservations || []).flatMap((reservation) => {
@@ -69,10 +80,17 @@ export default function ReservationCalendar({ reservations, scope, onRefresh }) 
       extendedProps: {
         rentalTitle: reservation.rental_title || "Rental",
         tenantName,
-        ownerName: reservation.owner_name || "",
+        tenantEmail: scope === "admin" ? reservation.tenant_email || "" : "",
+        ownerName: scope === "admin" ? reservation.owner_name || "" : "",
+        ownerEmail: scope === "admin" ? reservation.owner_email || "" : "",
         occupants: Number(reservation.occupants) || 0,
         termMonths: Number(reservation.term_months) || 0,
         tenancyStatus,
+        reservationStatus: reservation.status || "approved",
+        paymentStatus: scope === "admin"
+          ? reservation.initial_payment_status || "not recorded"
+          : reservation.payment_status || "not recorded",
+        paymentAmount: scope === "admin" ? Number(reservation.initial_payment_centavos) || 0 : 0,
       },
     }];
   });
@@ -115,14 +133,50 @@ export default function ReservationCalendar({ reservations, scope, onRefresh }) 
         height="auto"
         contentHeight="auto"
       />
-      {selectedReservation && <section className="reservation-calendar-detail" aria-live="polite">
-        <div><p className="eyebrow">SELECTED RESERVATION</p><h3>{selectedReservation.rentalTitle}</h3></div>
-        <button type="button" onClick={() => setSelectedReservation(null)}>Clear selection</button>
-        <p><strong>Tenant:</strong> {selectedReservation.tenantName}</p>
-        {scope === "admin" && <p><strong>Owner:</strong> {selectedReservation.ownerName || "Unavailable"}</p>}
-        <p><strong>Move-in:</strong> {formatDate(selectedReservation.start)} · <strong>Planned move-out:</strong> {formatDate(selectedReservation.end)}</p>
-        <p><strong>Occupants:</strong> {selectedReservation.occupants} · <strong>Term:</strong> {selectedReservation.termMonths} months · <strong>Status:</strong> {selectedReservation.tenancyStatus}</p>
-      </section>}
+      {selectedReservation ? <section className="reservation-calendar-detail" aria-live="polite">
+        <div className="reservation-calendar-detail-heading">
+          <div><p className="eyebrow">RESERVATION #{selectedReservation.id}</p><h3>{selectedReservation.rentalTitle}</h3></div>
+          <button type="button" onClick={() => setSelectedReservation(null)}>Clear selection</button>
+        </div>
+        <div className="reservation-calendar-detail-grid">
+          <div className="reservation-calendar-detail-item">
+            <span>Tenant</span>
+            <strong>{selectedReservation.tenantName}</strong>
+            {selectedReservation.tenantEmail && <small>{selectedReservation.tenantEmail}</small>}
+          </div>
+          {scope === "admin" && <div className="reservation-calendar-detail-item">
+            <span>Owner</span>
+            <strong>{selectedReservation.ownerName || "Unavailable"}</strong>
+            {selectedReservation.ownerEmail && <small>{selectedReservation.ownerEmail}</small>}
+          </div>}
+          <div className="reservation-calendar-detail-item">
+            <span>Move-in</span>
+            <strong>{formatDate(selectedReservation.start)}</strong>
+          </div>
+          <div className="reservation-calendar-detail-item">
+            <span>Planned move-out</span>
+            <strong>{formatDate(selectedReservation.end)}</strong>
+          </div>
+          <div className="reservation-calendar-detail-item">
+            <span>Occupants · term</span>
+            <strong>{selectedReservation.occupants || "Not provided"} · {selectedReservation.termMonths || "—"} months</strong>
+          </div>
+          {scope === "admin" ? <>
+            <div className="reservation-calendar-detail-item">
+              <span>Reservation status</span>
+              <strong className={`status-tag status-${selectedReservation.reservationStatus}`}>{formatStatus(selectedReservation.reservationStatus)}</strong>
+            </div>
+            <div className="reservation-calendar-detail-item">
+              <span>Initial payment</span>
+              <strong>{formatStatus(selectedReservation.paymentStatus)}</strong>
+              <small>{formatMoney(selectedReservation.paymentAmount)}</small>
+            </div>
+          </> : <div className="reservation-calendar-detail-item">
+            <span>Tenancy</span>
+            <strong>{selectedReservation.tenancyStatus}</strong>
+          </div>}
+        </div>
+      </section> : <p className="reservation-calendar-hint">Select a calendar event to see its reservation details.</p>}
       {!events.length && <p className="dashboard-empty">No paid reservations are available for this calendar yet.</p>}
     </div>
   );

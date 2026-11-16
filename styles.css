@@ -5724,30 +5724,35 @@ html {
 }
 
 .reservation-calendar-detail {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 7px 16px;
   margin-top: 18px;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid #dce7dc;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #f8fbf7;
 }
 
-.reservation-calendar-detail > div p,
-.reservation-calendar-detail > div h3 {
+.reservation-calendar-detail-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e3ebe3;
+}
+
+.reservation-calendar-detail-heading p,
+.reservation-calendar-detail-heading h3 {
   margin: 0;
 }
 
-.reservation-calendar-detail > div h3 {
+.reservation-calendar-detail-heading h3 {
   margin-top: 5px;
   color: #294332;
   font-size: 18px;
 }
 
-.reservation-calendar-detail > button {
-  align-self: start;
-  padding: 7px 10px;
+.reservation-calendar-detail-heading > button {
+  padding: 7px 11px;
   border: 1px solid #d3dfd4;
   border-radius: 7px;
   background: #fff;
@@ -5756,11 +5761,118 @@ html {
   font: inherit;
 }
 
-.reservation-calendar-detail > p {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: #56665a;
+.reservation-calendar-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.reservation-calendar-detail-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #e2eae2;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.reservation-calendar-detail-item > span {
+  color: #758178;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.reservation-calendar-detail-item > strong {
+  overflow-wrap: anywhere;
+  color: #294332;
+  font-size: 14px;
+}
+
+.reservation-calendar-detail-item > small {
+  overflow-wrap: anywhere;
+  color: #718077;
+  font-size: 12px;
+}
+
+.reservation-calendar-hint {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px dashed #d4dfd5;
+  border-radius: 9px;
+  color: #718077;
+  font-size: 14px;
+  text-align: center;
+}
+
+.reservation-hub {
+  display: grid;
+  gap: 18px;
+}
+
+.reservation-hub > .admin-page-heading {
+  margin-bottom: 0;
+}
+
+.reservation-hub-stats {
+  margin-bottom: 0;
+}
+
+.reservation-calendar-card .admin-panel-heading {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.reservation-calendar-card .admin-panel-heading > div > p:not(.eyebrow) {
+  margin: 6px 0 0;
+  color: #718077;
+  font-size: 14px;
   line-height: 1.5;
+}
+
+.reservation-calendar-card .admin-panel-heading > span {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eee8ff;
+  color: #624aa1;
+  font-weight: 650;
+}
+
+.reservation-calendar-card .reservation-calendar {
+  padding: 14px;
+  border: 1px solid #e5e9e5;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.reservation-calendar-card .reservation-calendar-summary {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  margin-bottom: 8px;
+}
+
+.reservation-list-panel {
+  overflow: hidden;
+}
+
+.reservation-list-panel .admin-panel-heading {
+  align-items: center;
+  margin: 0;
+  padding: 16px 18px;
+}
+
+.reservation-list-panel .admin-panel-heading .eyebrow {
+  margin: 0 0 5px;
+}
+
+.reservation-list-panel .admin-panel-heading h2 {
+  margin: 0;
 }
 
 @media (max-width: 640px) {
@@ -5780,11 +5892,31 @@ html {
     text-align: center;
   }
 
-  .reservation-calendar-detail {
-    grid-template-columns: minmax(0, 1fr);
+  .reservation-calendar-detail-heading {
+    flex-direction: column;
   }
 
-  .reservation-calendar-detail > p {
-    grid-column: 1;
+  .reservation-calendar-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reservation-calendar-card .reservation-calendar {
+    padding: 8px;
+  }
+
+  .reservation-calendar-card .admin-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .reservation-list-panel .admin-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 420px) {
+  .reservation-calendar-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

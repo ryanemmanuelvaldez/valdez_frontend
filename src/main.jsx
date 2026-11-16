@@ -2067,8 +2067,7 @@ const adminScreens = [
   { id: "map", label: "Property Locations", icon: "map" },
   { id: "users", label: "Manage Users & Roles", icon: "profile" },
   { id: "listings", label: "Review Property Listings", icon: "listings" },
-  { id: "reservations", label: "Monitor Reservations", icon: "reservations" },
-  { id: "calendar", label: "Reservation Calendar", icon: "reservations" },
+  { id: "reservations", label: "Reservations", icon: "reservations" },
   { id: "reviews", label: "Moderate Reviews", icon: "reviews" },
   { id: "support", label: "Support Ticket Management", icon: "support" },
   { id: "announcements", label: "System Announcements", icon: "announcements" },
@@ -2147,7 +2146,6 @@ function AdminToolsScreen({ screen }) {
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const endpointByScreen = {
     reservations: ["admin/reservations", "reservations"],
-    calendar: ["admin/reservations", "reservations"],
     reviews: ["admin/reviews", "reviews"],
     support: ["admin/support-tickets", "tickets"],
     announcements: ["admin/announcements", "announcements"],
@@ -2172,7 +2170,7 @@ function AdminToolsScreen({ screen }) {
       : result[field]);
   }, [endpoint, field, screen]);
 
-  const refreshCalendar = useCallback(async () => {
+  const refreshReservations = useCallback(async () => {
     setError("");
     try {
       await load();
@@ -2235,8 +2233,7 @@ function AdminToolsScreen({ screen }) {
   }
 
   const headings = {
-    reservations: ["Reservations", "Review rental requests, property details, and recorded move-in payments."],
-    calendar: ["Reservation calendar", "View confirmed move-in dates and rental terms across the platform."],
+    reservations: ["Reservations & Calendar", "Review requests and view confirmed rental dates in one place."],
     reviews: ["Tenant reviews & rental rankings", "Review tenant feedback and compare the highest-rated rentals across the platform."],
     support: ["Support tickets", "Reply to tenant and owner requests and set status and priority."],
     announcements: ["System announcements", "Create updates for all users, tenants, or property owners."],
@@ -2253,24 +2250,52 @@ function AdminToolsScreen({ screen }) {
   const formatMoney = (centavos) => `₱${(Number(centavos || 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   if (screen === "reservations") {
-    return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}{notice && <p className="payment-return-notice" role="status">{notice}</p>}
-      <section className="admin-panel admin-table-panel"><AdminTable headers={["Rental", "Tenant", "Owner", "Move-in", "Term", "Status", "Initial payment", "Actions"]} rows={(data || []).map((item) => [
-        <strong>{item.rental_title}</strong>,
-        <>{item.tenant_name}<small>{item.tenant_email}</small></>,
-        <>{item.owner_name}<small>{item.owner_email}</small></>,
-        formatDate(item.move_in),
-        `${item.term_months} months`,
-        <span className={`status-tag status-${item.status}`}>{item.status.replace("_", " ")}</span>,
-        <>{item.initial_payment_status}{item.initial_payment_centavos ? <small>{formatMoney(item.initial_payment_centavos)}</small> : null}</>,
-        item.status === "pending" ? <div className="admin-inline-actions"><button disabled={pending} onClick={() => perform(`admin/reservations/${item.id}/review`, { decision: "approve" })}>Approve</button><button className="muted" disabled={pending} onClick={() => perform(`admin/reservations/${item.id}/review`, { decision: "decline" })}>Decline</button></div> : "—",
-      ])} empty="No rental reservations have been submitted." /></section>
-    </>;
-  }
-
-  if (screen === "calendar") {
-    return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}
-      {!data && !error ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !error && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={data || []} scope="admin" onRefresh={refreshCalendar} /></React.Suspense>}
-    </>;
+    const reservationItems = Array.isArray(data) ? data : [];
+    const confirmedCount = reservationItems.filter((item) => item.status === "approved" && item.initial_payment_status === "paid").length;
+    const pendingCount = reservationItems.filter((item) => item.status === "pending").length;
+    const paymentCount = reservationItems.filter((item) => item.status === "approved" && item.initial_payment_status !== "paid").length;
+    return <div className="reservation-hub">
+      {heading}
+      <div className="admin-stat-grid reservation-hub-stats">
+        <article className="admin-stat"><span>Total requests</span><strong>{data ? reservationItems.length : "—"}</strong></article>
+        <article className="admin-stat"><span>Confirmed & paid</span><strong>{data ? confirmedCount : "—"}</strong></article>
+        <article className="admin-stat"><span>Awaiting review</span><strong>{data ? pendingCount : "—"}</strong></article>
+        <article className="admin-stat"><span>Awaiting payment</span><strong>{data ? paymentCount : "—"}</strong></article>
+      </div>
+      {error && <p className="dashboard-empty" role="alert">{error}</p>}
+      {notice && <p className="payment-return-notice" role="status">{notice}</p>}
+      {!data && !error ? <p className="dashboard-empty">Loading reservations…</p> : data && <>
+        <section className="admin-panel reservation-calendar-card">
+          <div className="admin-panel-heading">
+            <div>
+              <p className="eyebrow">CONFIRMED & PAID</p>
+              <h2>Reservation calendar</h2>
+              <p>Click an event to see the renter, owner, dates, and payment details.</p>
+            </div>
+            <span>{confirmedCount} confirmed</span>
+          </div>
+          <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}>
+            <ReservationCalendar reservations={reservationItems} scope="admin" onRefresh={refreshReservations} />
+          </React.Suspense>
+        </section>
+        <section className="admin-panel admin-table-panel reservation-list-panel">
+          <div className="admin-panel-heading">
+            <div><p className="eyebrow">ALL REQUESTS</p><h2>Reservation requests</h2></div>
+            <span>{reservationItems.length} total</span>
+          </div>
+          <AdminTable headers={["Rental", "Tenant", "Owner", "Move-in", "Term", "Status", "Initial payment", "Actions"]} rows={reservationItems.map((item) => [
+            <strong>{item.rental_title}</strong>,
+            <>{item.tenant_name}<small>{item.tenant_email}</small></>,
+            <>{item.owner_name}<small>{item.owner_email}</small></>,
+            formatDate(item.move_in),
+            `${item.term_months} months`,
+            <span className={`status-tag status-${item.status}`}>{item.status.replace("_", " ")}</span>,
+            <>{item.initial_payment_status}{item.initial_payment_centavos ? <small>{formatMoney(item.initial_payment_centavos)}</small> : null}</>,
+            item.status === "pending" ? <div className="admin-inline-actions"><button disabled={pending} onClick={() => perform(`admin/reservations/${item.id}/review`, { decision: "approve" })}>Approve</button><button className="muted" disabled={pending} onClick={() => perform(`admin/reservations/${item.id}/review`, { decision: "decline" })}>Decline</button></div> : "—",
+          ])} empty="No rental reservations have been submitted." />
+        </section>
+      </>}
+    </div>;
   }
 
   if (screen === "reviews") {
@@ -2473,7 +2498,8 @@ function AdminListingForm({ listing, owners, pending, onCancel, onSubmit }) {
 
 function AdminWorkspace({ user, onLogout, pending: logoutPending, route }) {
   const routeScreen = route.startsWith("admin/") ? route.split("/")[1] : "dashboard";
-  const [activeScreen, setActiveScreen] = useState(routeScreen);
+  const normalizedRouteScreen = routeScreen === "calendar" ? "reservations" : routeScreen;
+  const [activeScreen, setActiveScreen] = useState(normalizedRouteScreen);
   const [overview, setOverview] = useState(null);
   const [paymentAnalytics, setPaymentAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
@@ -2492,8 +2518,8 @@ function AdminWorkspace({ user, onLogout, pending: logoutPending, route }) {
   const [formPending, setFormPending] = useState(false);
 
   useEffect(() => {
-    setActiveScreen(routeScreen);
-  }, [routeScreen]);
+    setActiveScreen(normalizedRouteScreen);
+  }, [normalizedRouteScreen]);
 
   function navigateAdmin(screen) {
     setActiveScreen(screen);
