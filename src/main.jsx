@@ -9,6 +9,7 @@ import { demoListings } from "./data/demoListings.js";
 import { API_BASE, apiRequest, apiUpload, propertyPhotoSource, request } from "./lib/api.js";
 import "../styles.css";
 
+const ReservationCalendar = React.lazy(() => import("./components/ReservationCalendar.jsx"));
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim() || "";
 
 function readFileAsDataUrl(file) {
@@ -359,6 +360,7 @@ const workspaceRoutes = {
     { path: "requests", label: "Rental requests", icon: "requests" },
     { path: "renters", label: "Monitor renters", icon: "reservations" },
     { path: "sales", label: "My sales", icon: "analytics" },
+    { path: "calendar", label: "Reservation calendar", icon: "reservations" },
     { path: "payments", label: "Payments & QR codes", icon: "wallet" },
     { path: "updates", label: "Updates & support", icon: "support" },
     { path: "profile", label: "My profile", icon: "profile" },
@@ -1329,6 +1331,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
   const [renters, setRenters] = useState([]);
   const [editingRenterId, setEditingRenterId] = useState(null);
   const [renterFilter, setRenterFilter] = useState("active");
+  const [calendarRenters, setCalendarRenters] = useState([]);
   const [ownerPayments, setOwnerPayments] = useState([]);
   const [salesAnalytics, setSalesAnalytics] = useState(null);
   const [paymentToConfirm, setPaymentToConfirm] = useState(null);
@@ -1365,6 +1368,9 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     }
     tasks.push({ key: "documents", promise: apiRequest("owner/verification-documents", undefined, "GET") });
     if ((route === "dashboard" || route === "payments") && user.owner_status === "verified") {
+    if (route === "calendar" && user.owner_status === "verified") {
+      tasks.push({ key: "calendarRenters", promise: apiRequest("owner/renters", undefined, "GET") });
+    }
       tasks.push({ key: "payments", promise: apiRequest("owner/payments", undefined, "GET") });
       tasks.push({ key: "income", promise: apiRequest("owner/income", undefined, "GET") });
     }
@@ -1389,6 +1395,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       if (key === "renters") setRenters(result.value.renters || []);
       if (key === "documents") setVerificationDocuments(result.value.documents || []);
       if (key === "payments") {
+      if (key === "calendarRenters") setCalendarRenters(result.value.renters || []);
         setOwnerPayments(result.value.payments || []);
         setOwnerQrProfile(result.value.profile || { gcash_qr_data: null, maya_qr_data: null, owner_phone: user.phone || "" });
       }
@@ -1408,6 +1415,9 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
         setRentalRequests(result.requests || []);
       } else if (route === "renters" && user.owner_status === "verified") {
         const result = await apiRequest("owner/renters", undefined, "GET");
+      } else if (route === "calendar" && user.owner_status === "verified") {
+        const result = await apiRequest("owner/renters", undefined, "GET");
+        setCalendarRenters(result.renters || []);
         setRenters(result.renters || []);
       } else if (route === "payments" && user.owner_status === "verified") {
         const [paymentResult, incomeResult] = await Promise.all([
@@ -1424,7 +1434,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     }
   }, [route, user.owner_status, user.phone]);
   useEffect(() => {
-    if (!["requests", "renters", "payments"].includes(route)) return undefined;
+    if (!["requests", "calendar", "renters", "payments"].includes(route)) return undefined;
     const timer = window.setInterval(refreshVisibleOwnerData, 10000);
     return () => window.clearInterval(timer);
   }, [route, refreshVisibleOwnerData]);
@@ -1644,6 +1654,7 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
     requests: ["Rental applications", "Review tenant requests and follow each payment confirmation."],
     renters: ["Monitor renters", "Track each tenant's rental, contact details, payment balance, and tenancy status."],
     payments: ["Rent payments & wallet QR", "Set up your own GCash/Maya QR and manage tenant wallet transfers or cash payments."],
+    calendar: ["Reservation calendar", "See confirmed move-in dates and rental terms across your properties."],
     sales: ["My rental sales", "See only the confirmed rental income connected to your properties."],
   };
   const [pageTitle, pageDescription] = routeTitles[route] || routeTitles.dashboard;
@@ -1707,6 +1718,13 @@ function OwnerWorkspace({ user, route, onUserUpdate }) {
       </section>}
       {route === "listings" && <div className="owner-dashboard-grid owner-dashboard-grid-single">
         <section className="dashboard-panel owner-listings-panel">
+      {route === "calendar" && <section className="dashboard-panel reservation-calendar-panel">
+        <div className="dashboard-panel-heading">
+          <div><p className="eyebrow">CONFIRMED RENTALS</p><h2>Reservation calendar</h2></div>
+          {verified && <button type="button" onClick={refreshVisibleOwnerData}>Refresh</button>}
+        </div>
+        {!verified ? <p className="dashboard-empty">Reservation calendars are available after your owner account is verified.</p> : loading ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !loadError && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={calendarRenters} scope="owner" /></React.Suspense>}
+      </section>}
           <div className="dashboard-panel-heading"><div><p className="eyebrow">YOUR PORTFOLIO</p><h2>Manage property listings</h2></div><span>{pendingCount} awaiting admin</span></div>
           {loading ? <p className="dashboard-empty">Loading your property listings…</p> : listings.length ? (
             <div className="owner-listing-list">{listings.map((listing) => (
@@ -2053,6 +2071,7 @@ const adminScreens = [
   { id: "reservations", label: "Monitor Reservations", icon: "reservations" },
   { id: "reviews", label: "Moderate Reviews", icon: "reviews" },
   { id: "support", label: "Support Ticket Management", icon: "support" },
+  { id: "calendar", label: "Reservation Calendar", icon: "reservations" },
   { id: "announcements", label: "System Announcements", icon: "announcements" },
   { id: "analytics", label: "Platform Analytics", icon: "analytics" },
   { id: "sales", label: "Sales & Forecast", icon: "analytics" },
@@ -2131,6 +2150,7 @@ function AdminToolsScreen({ screen }) {
     reservations: ["admin/reservations", "reservations"],
     reviews: ["admin/reviews", "reviews"],
     support: ["admin/support-tickets", "tickets"],
+    calendar: ["admin/reservations", "reservations"],
     announcements: ["admin/announcements", "announcements"],
     analytics: ["admin/analytics", "analytics"],
     sales: ["admin/sales-analytics", "sales"],
@@ -2210,6 +2230,7 @@ function AdminToolsScreen({ screen }) {
     reservations: ["Reservations", "Review rental requests, property details, and recorded move-in payments."],
     reviews: ["Tenant reviews & rental rankings", "Review tenant feedback and compare the highest-rated rentals across the platform."],
     support: ["Support tickets", "Reply to tenant and owner requests and set status and priority."],
+    calendar: ["Reservation calendar", "View confirmed move-in dates and rental terms across the platform."],
     announcements: ["System announcements", "Create updates for all users, tenants, or property owners."],
     analytics: ["Platform analytics", "Current account, property, rental, and payment activity."],
     sales: ["Platform sales & forecast", "Review confirmed rent income across all owners and see a short-term sales projection."],
@@ -2240,6 +2261,12 @@ function AdminToolsScreen({ screen }) {
 
   if (screen === "reviews") {
     const reviews = data?.reviews || [];
+  if (screen === "calendar") {
+    return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}
+      {!data && !error ? <p className="dashboard-empty">Loading confirmed reservations…</p> : !error && <React.Suspense fallback={<p className="dashboard-empty">Opening reservation calendar…</p>}><ReservationCalendar reservations={data || []} scope="admin" /></React.Suspense>}
+    </>;
+  }
+
     const topRentals = data?.top_rentals || [];
     return <>{heading}{error && <p className="dashboard-empty" role="alert">{error}</p>}{notice && <p className="payment-return-notice" role="status">{notice}</p>}
       <section className="admin-panel admin-rating-leaderboard">
@@ -2857,7 +2884,7 @@ function readQrFile(file, existingImage) {
 function App() {
   const getScreen = useCallback(() => {
     const screen = window.location.hash.slice(1);
-    return ["home", "login", "register", "forgot", "verify", "dashboard", "admin/dashboard", "admin/map", "admin/users", "admin/listings", "admin/reservations", "admin/reviews", "admin/support", "admin/announcements", "admin/analytics", "admin/sales", "admin/reports", "tenant/dashboard", "tenant/browse", "tenant/requests", "tenant/payments", "tenant/updates", "tenant/profile", "owner/dashboard", "owner/listings", "owner/map", "owner/requests", "owner/renters", "owner/sales", "owner/payments", "owner/updates", "owner/profile"].includes(screen) ? screen : "home";
+    return ["home", "login", "register", "forgot", "verify", "dashboard", "admin/dashboard", "admin/map", "admin/users", "admin/listings", "admin/reservations", "admin/calendar", "admin/reviews", "admin/support", "admin/announcements", "admin/analytics", "admin/sales", "admin/reports", "tenant/dashboard", "tenant/browse", "tenant/requests", "tenant/payments", "tenant/updates", "tenant/profile", "owner/dashboard", "owner/listings", "owner/map", "owner/requests", "owner/calendar", "owner/renters", "owner/sales", "owner/payments", "owner/updates", "owner/profile"].includes(screen) ? screen : "home";
   }, []);
   const [screen, setScreen] = useState(getScreen);
   const [user, setUser] = useState(null);
@@ -2922,7 +2949,7 @@ function App() {
         } else {
           const role = result.user.account_type === "owner" ? "owner" : "tenant";
           const validRoutes = role === "owner"
-            ? ["dashboard", "home", "login", "register", "forgot", "verify", "owner/dashboard", "owner/listings", "owner/map", "owner/requests", "owner/renters", "owner/sales", "owner/payments", "owner/updates", "owner/profile"]
+            ? ["dashboard", "home", "login", "register", "forgot", "verify", "owner/dashboard", "owner/listings", "owner/map", "owner/requests", "owner/calendar", "owner/renters", "owner/sales", "owner/payments", "owner/updates", "owner/profile"]
             : ["dashboard", "home", "login", "register", "forgot", "verify", "tenant/dashboard", "tenant/browse", "tenant/requests", "tenant/payments", "tenant/updates", "tenant/profile"];
           const validRoute = validRoutes.includes(currentScreen);
           if (!validRoute) {

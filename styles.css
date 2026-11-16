@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+  font-size: 17px;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   color: #102c3b;
   background: #f2f7f6;
@@ -51,7 +52,7 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 11px;
-  font-size: 16px;
+  font-size: 17.3px;
   font-weight: 700;
   letter-spacing: -0.04em;
   text-decoration: none;
@@ -70,20 +71,20 @@ a:hover {
 .wordmark-icon {
   width: 32px;
   height: 32px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .topbar-note,
 .footer {
   color: #6d6d68;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .topbar-nav {
   display: flex;
   align-items: center;
   gap: clamp(14px, 2.8vw, 34px);
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .topbar-nav a {
@@ -148,7 +149,7 @@ a:hover {
   padding: 0 18px;
   border-bottom: 1px solid #dedfdb;
   color: #555650;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -157,7 +158,7 @@ a:hover {
   padding: 5px 7px;
   border: 1px solid #c9cac7;
   color: #73736f;
-  font-size: 10px;
+  font-size: 10.8px;
 }
 
 .admin-sidebar nav {
@@ -179,12 +180,12 @@ a:hover {
   cursor: pointer;
   text-align: left;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-sidebar nav button > span {
   color: #858680;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .admin-sidebar nav button b {
@@ -193,7 +194,7 @@ a:hover {
   background: #e8e8e4;
   color: #343431;
   text-align: center;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .admin-sidebar nav button:hover {
@@ -225,19 +226,19 @@ a:hover {
 
 .admin-sidebar-footer > span {
   color: #777771;
-  font-size: 10px;
+  font-size: 10.8px;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
 
 .admin-sidebar-footer strong {
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .admin-sidebar-footer small {
   overflow-wrap: anywhere;
   color: #73736f;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-sidebar-footer button {
@@ -249,7 +250,7 @@ a:hover {
   color: #52534e;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: underline;
 }
 
@@ -267,7 +268,7 @@ a:hover {
   padding: 0 3vw;
   border-bottom: 1px solid #d3d4d0;
   color: #73736f;
-  font-size: 10px;
+  font-size: 10.8px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -279,7 +280,7 @@ a:hover {
 
 .admin-breadcrumb small {
   margin-left: auto;
-  font-size: 10px;
+  font-size: 10.8px;
 }
 
 .admin-screen {
@@ -303,14 +304,14 @@ a:hover {
 
 .admin-page-heading h1 {
   margin-top: 9px;
-  font-size: clamp(27px, 3vw, 34px);
+  font-size: clamp(29.2px, 3.2vw, 36.7px);
   letter-spacing: -0.055em;
 }
 
 .admin-page-heading p:not(.eyebrow) {
   margin: 8px 0 0;
   color: #666760;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.55;
 }
 
@@ -323,7 +324,7 @@ a:hover {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -351,14 +352,14 @@ a:hover {
 
 .admin-stat > span {
   color: #666760;
-  font-size: 11px;
+  font-size: 11.9px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .admin-stat strong {
   margin-top: 9px;
-  font-size: 27px;
+  font-size: 29.2px;
   font-weight: 600;
   letter-spacing: -0.04em;
 }
@@ -366,7 +367,7 @@ a:hover {
 .admin-stat small {
   margin-top: 5px;
   color: #73736f;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -396,13 +397,13 @@ a:hover {
 
 .admin-panel-heading h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17.3px;
   font-weight: 500;
 }
 
 .admin-panel-heading > span {
   color: #73736f;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-panel-heading button {
@@ -412,7 +413,7 @@ a:hover {
   color: #343431;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-task-list {
@@ -438,14 +439,14 @@ a:hover {
 .admin-task-list button span {
   overflow: hidden;
   color: #343431;
-  font-size: 12px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .admin-task-list button small {
   color: #73736f;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .admin-task-list .status-tag {
@@ -459,7 +460,7 @@ a:hover {
   padding: 30px 10px;
   color: #73736f;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-recent {
@@ -471,7 +472,7 @@ a:hover {
   border: 1px solid #d1d2ce;
   background: #fff;
   color: #555650;
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -490,7 +491,7 @@ a:hover {
   min-height: 37px;
   border-color: #c9cac7;
   background: #fff;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-toolbar input {
@@ -512,7 +513,7 @@ a:hover {
   color: #555650;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-filter-tabs button.selected {
@@ -533,7 +534,7 @@ a:hover {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-table th,
@@ -547,7 +548,7 @@ a:hover {
 .admin-table th {
   background: #f0f0ee;
   color: #666760;
-  font-size: 10px;
+  font-size: 10.8px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -571,13 +572,13 @@ a:hover {
 
 .admin-user-cell strong {
   color: #343431;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .admin-user-cell small {
   color: #73736f;
-  font-size: 11px;
+  font-size: 11.9px;
   overflow-wrap: anywhere;
 }
 
@@ -587,7 +588,7 @@ a:hover {
   border: 1px solid #c8c9c5;
   background: #f5f5f2;
   color: #555650;
-  font-size: 10px;
+  font-size: 10.8px;
   font-weight: 600;
   text-transform: capitalize;
   white-space: nowrap;
@@ -623,7 +624,7 @@ a:hover {
   color: #315c37;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -652,7 +653,7 @@ a:hover {
   background: #fff;
   color: #73736f;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-placeholder {
@@ -667,12 +668,12 @@ a:hover {
 .admin-placeholder-icon {
   margin-bottom: 14px;
   color: #787972;
-  font-size: 29px;
+  font-size: 31.3px;
 }
 
 .admin-placeholder h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17.3px;
   font-weight: 500;
 }
 
@@ -680,7 +681,7 @@ a:hover {
   max-width: 420px;
   margin: 9px 0 0;
   color: #73736f;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.65;
 }
 
@@ -691,7 +692,7 @@ a:hover {
   padding: 12px clamp(20px, 3vw, 48px);
   border-top: 1px solid #d3d4d0;
   color: #73736f;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .home-card {
@@ -712,7 +713,7 @@ a:hover {
 
 .browse-hero h1 {
   margin-top: 13px;
-  font-size: clamp(42px, 7vw, 76px);
+  font-size: clamp(45.4px, 7.6vw, 82.1px);
   letter-spacing: -0.075em;
   line-height: 0.98;
 }
@@ -726,7 +727,7 @@ a:hover {
   max-width: 445px;
   margin: 19px 0;
   color: #525750;
-  font-size: 16px;
+  font-size: 17.3px;
   line-height: 1.7;
 }
 
@@ -748,7 +749,7 @@ a:hover {
 .listing-heading h2,
 .section-heading h2 {
   margin: 9px 0 0;
-  font-size: clamp(24px, 3vw, 33px);
+  font-size: clamp(25.9px, 3.2vw, 35.6px);
   font-weight: 500;
   letter-spacing: -0.055em;
 }
@@ -769,7 +770,7 @@ a:hover {
   color: var(--ink);
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -801,7 +802,7 @@ a:hover {
   padding: 14px;
   background: #ddd9cd;
   color: #353832;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -841,18 +842,18 @@ a:hover {
 .admin-workspace h3,
 .empty-state h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16.2px;
   font-weight: 600;
 }
 
 .rental-title-row strong {
   flex: 0 0 auto;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .rental-title-row small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 }
 
@@ -860,7 +861,7 @@ a:hover {
 .rental-owner {
   margin: 9px 0;
   color: #6b6c65;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rental-description {
@@ -868,7 +869,7 @@ a:hover {
   overflow: hidden;
   margin: 12px 0;
   color: #575851;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -887,14 +888,14 @@ a:hover {
   max-width: 440px;
   margin: 10px 0 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.6;
 }
 
 .empty-icon {
   margin-bottom: 13px;
   color: #8b9187;
-  font-size: 30px;
+  font-size: 32.4px;
 }
 
 .compact {
@@ -918,7 +919,7 @@ a:hover {
   border: 1px solid #dfd2b1;
   background: #faf6eb;
   color: #705c2c;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -943,7 +944,7 @@ a:hover {
 .listing-form label {
   margin-top: 4px;
   color: #343431;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 600;
 }
 
@@ -955,7 +956,7 @@ a:hover {
   border-radius: 0;
   outline: none;
   font: inherit;
-  font-size: 16px;
+  font-size: 17.3px;
   resize: vertical;
 }
 
@@ -982,7 +983,7 @@ a:hover {
 .form-message,
 .muted-copy {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -995,7 +996,7 @@ a:hover {
   padding: 5px 8px;
   background: #f5f0e4;
   color: #705c2c;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: capitalize;
 }
@@ -1023,7 +1024,7 @@ a:hover {
   background: #efefeb;
   color: #555650;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-request {
@@ -1041,12 +1042,12 @@ a:hover {
 }
 
 .owner-request strong {
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .owner-request span {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   overflow-wrap: anywhere;
 }
 
@@ -1095,20 +1096,20 @@ a:hover {
 .brand-icon {
   width: 36px;
   height: 36px;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .eyebrow {
   margin: 0;
   color: #777771;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.13em;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(27px, 5vw, 32px);
+  font-size: clamp(29.2px, 5.4vw, 34.6px);
   font-weight: 500;
   letter-spacing: -0.055em;
   line-height: 1.2;
@@ -1117,7 +1118,7 @@ h1 {
 .intro {
   margin: 10px 0 25px;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 17.3px;
   line-height: 1.65;
 }
 
@@ -1129,7 +1130,7 @@ form {
 form > label {
   margin-top: 4px;
   color: #343431;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 600;
 }
 
@@ -1144,7 +1145,7 @@ select {
   background: #fff;
   color: var(--ink);
   font: inherit;
-  font-size: 16px;
+  font-size: 17.3px;
   transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
@@ -1164,7 +1165,7 @@ select:focus {
   justify-content: space-between;
   gap: 14px;
   margin: 5px 0 8px;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .form-options a,
@@ -1182,7 +1183,7 @@ select:focus {
   display: block;
   margin: 5px 0;
   color: #8a332b;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
@@ -1213,7 +1214,7 @@ select:focus {
   border-radius: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 15px;
+  font-size: 16.2px;
   font-weight: 700;
   transition: background 140ms ease, color 140ms ease, opacity 140ms ease;
 }
@@ -1247,7 +1248,7 @@ select:focus {
   margin: 21px 0 0;
   color: #6c6c67;
   text-align: center;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .fine-print {
@@ -1256,7 +1257,7 @@ select:focus {
   border-top: 1px solid var(--line);
   color: #80807a;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
@@ -1266,7 +1267,7 @@ select:focus {
   border: 1px solid #d3d3ce;
   background: #f5f5f2;
   color: #343431;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -1294,7 +1295,7 @@ select:focus {
 }
 
 .account-heading h1 {
-  font-size: 27px;
+  font-size: 29.2px;
 }
 
 .account-avatar {
@@ -1306,7 +1307,7 @@ select:focus {
   border: 1px solid #d5d5d0;
   border-radius: 50%;
   background: #f0f0ed;
-  font-size: 15px;
+  font-size: 16.2px;
   font-weight: 700;
 }
 
@@ -1323,12 +1324,12 @@ select:focus {
 .profile-list dt {
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .profile-list dd {
   margin: 0;
-  font-size: 16px;
+  font-size: 17.3px;
   overflow-wrap: anywhere;
 }
 
@@ -1356,7 +1357,7 @@ select:focus {
 
   .topbar-nav {
     gap: 12px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .topbar-nav .nav-cta {
@@ -1433,7 +1434,7 @@ select:focus {
   }
 
   .admin-stat strong {
-    font-size: 23px;
+    font-size: 24.8px;
   }
 
   .admin-overview-grid,
@@ -1462,7 +1463,7 @@ select:focus {
   }
 
   .browse-hero h1 {
-    font-size: 49px;
+    font-size: 52.9px;
   }
 
   .listing-heading {
@@ -1498,7 +1499,7 @@ select:focus {
 
   .footer {
     padding: 16px 20px;
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
@@ -1564,7 +1565,7 @@ body {
 
 .brand-wordmark {
   color: var(--ink);
-  font-size: 19px;
+  font-size: 20.5px;
   font-weight: 800;
   letter-spacing: -.065em;
 }
@@ -1680,7 +1681,7 @@ body {
   border-radius: 10px;
   background: #e9f7f5;
   color: #31555b;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -1755,7 +1756,7 @@ body {
   border-radius: 999px;
   background: rgba(255, 255, 255, .94);
   color: #294738;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: .04em;
 }
 
@@ -1770,7 +1771,7 @@ body {
 
 .rental-title-row h3 {
   color: #102c3b;
-  font-size: 17px;
+  font-size: 18.4px;
   letter-spacing: -.025em;
 }
 
@@ -1788,7 +1789,7 @@ body {
 .rental-location::before {
   color: #b17c34;
   content: "âŒ–";
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .rental-description {
@@ -1811,7 +1812,7 @@ body {
   border-radius: 999px;
   background: #f5f8f4;
   color: #40594a;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .rental-detail-tags span {
@@ -1822,7 +1823,7 @@ body {
 .rental-availability {
   margin: 14px 0 0;
   color: #68766f;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rental-contact {
@@ -1834,7 +1835,7 @@ body {
   padding-top: 13px;
   border-top: 1px solid #e8eee8;
   color: #159c96;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
 }
@@ -1855,7 +1856,7 @@ body {
   color: #117d79;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -1880,13 +1881,13 @@ body {
 .rental-map-message {
   margin: 0;
   color: #667780;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .rental-map-link {
   width: fit-content;
   color: #117d79;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -1947,7 +1948,7 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   color: #39463e;
-  font-size: 23px;
+  font-size: 24.8px;
   line-height: 1;
   cursor: pointer;
 }
@@ -1975,7 +1976,7 @@ body {
 .property-map-info-heading strong {
   flex: 1 1 160px;
   overflow-wrap: anywhere;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .property-map-info-heading span {
@@ -2011,7 +2012,7 @@ body {
 
 .property-map-info-facts {
   color: #526257;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .property-map-info-description {
@@ -2051,7 +2052,7 @@ body {
 
 .property-location-picker > div:first-child strong {
   color: #2b4234;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .property-location-picker > div:first-child p,
@@ -2059,7 +2060,7 @@ body {
 .property-map-error {
   margin: 0;
   color: #667780;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -2082,7 +2083,7 @@ body {
   display: grid;
   gap: 5px;
   color: #47564a;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -2101,7 +2102,7 @@ body {
 .property-map-count {
   margin: 10px 0 0;
   color: #667780;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .mapped-property-list {
@@ -2131,7 +2132,7 @@ body {
 
 .mapped-property-row span {
   color: #667780;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -2143,7 +2144,7 @@ body {
 
 .unmapped-property-list > strong {
   color: #526257;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .unmapped-property-row {
@@ -2154,7 +2155,7 @@ body {
   padding: 10px 0;
   border-top: 1px solid #e8eee8;
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .unmapped-property-row > span:first-child {
@@ -2227,14 +2228,14 @@ body {
 
 .listing-form-heading h3 {
   color: #102c3b;
-  font-size: 23px;
+  font-size: 24.8px;
   letter-spacing: -.04em;
 }
 
 .listing-form-heading p:not(.eyebrow) {
   margin: 8px 0 0;
   color: #6b7a70;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.6;
 }
 
@@ -2244,7 +2245,7 @@ body {
   border-radius: 999px;
   background: #edf4ed;
   color: #42634d;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2259,7 +2260,7 @@ body {
 .listing-form-group legend {
   padding: 0 8px;
   color: #2b503c;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 700;
 }
 
@@ -2283,7 +2284,7 @@ body {
 .listing-field label {
   margin: 0;
   color: #3d5145;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .listing-field input,
@@ -2298,7 +2299,7 @@ body {
   background: #fbfcfa;
   color: #283b30;
   font: inherit;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .listing-field textarea {
@@ -2315,7 +2316,7 @@ body {
 
 .listing-field small {
   color: #77857b;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .utilities-toggle {
@@ -2329,7 +2330,7 @@ body {
   border-radius: 8px;
   background: #f4f7f3;
   color: #40574a !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 .utilities-toggle input {
@@ -2348,7 +2349,7 @@ body {
 .listing-form-actions p {
   margin: 0;
   color: #68766f;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .listing-form .button {
@@ -2477,7 +2478,7 @@ body {
 .role-dashboard-heading h1 {
   margin-top: 9px;
   color: #102c3b;
-  font-size: clamp(29px, 4vw, 39px);
+  font-size: clamp(31.3px, 4.3vw, 42.1px);
   font-weight: 650;
   letter-spacing: -.06em;
 }
@@ -2485,7 +2486,7 @@ body {
 .role-dashboard-heading p:not(.eyebrow) {
   margin: 8px 0 0;
   color: #6b7a70;
-  font-size: 15px;
+  font-size: 16.2px;
   line-height: 1.6;
 }
 
@@ -2503,7 +2504,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
 }
@@ -2535,7 +2536,7 @@ body {
 
 .dashboard-stat > span {
   color: #68766f;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -2544,7 +2545,7 @@ body {
 .dashboard-stat strong {
   margin-top: 12px;
   color: #102c3b;
-  font-size: 29px;
+  font-size: 31.3px;
   font-weight: 650;
   letter-spacing: -.05em;
 }
@@ -2553,7 +2554,7 @@ body {
   margin-top: auto;
   padding-top: 7px;
   color: #768279;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -2579,13 +2580,13 @@ body {
 .dashboard-panel-heading .eyebrow {
   margin-bottom: 6px;
   color: #718477;
-  font-size: 10px;
+  font-size: 10.8px;
 }
 
 .dashboard-panel-heading h2 {
   margin: 0;
   color: #263b30;
-  font-size: 15px;
+  font-size: 16.2px;
   font-weight: 650;
   letter-spacing: -.025em;
 }
@@ -2593,7 +2594,7 @@ body {
 .dashboard-panel-heading > span,
 .dashboard-panel-heading > a {
   color: #68766f;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .dashboard-panel-heading > a {
@@ -2606,7 +2607,7 @@ body {
   margin: 0;
   padding: 15px 2px;
   color: #728077;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.65;
 }
 
@@ -2636,11 +2637,11 @@ body {
 }
 
 .tenant-rental-grid .rental-title-row h3 {
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .tenant-rental-grid .rental-contact span {
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .workflow-note {
@@ -2664,19 +2665,19 @@ body {
   border-radius: 50%;
   background: #edf4ed;
   color: #3b6249;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 700;
 }
 
 .workflow-note strong {
   color: #31463a;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .workflow-note p {
   margin: 5px 0 0;
   color: #758178;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -2718,13 +2719,13 @@ body {
 
 .owner-verification-banner strong {
   color: #30493a;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .owner-verification-banner p {
   margin: 4px 0 0;
   color: #6f7d72;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -2735,7 +2736,7 @@ body {
   border-radius: 999px;
   background: #f6efdf;
   color: #79602f;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 700;
 }
 
@@ -2808,7 +2809,7 @@ body {
 .owner-listing-info strong {
   overflow: hidden;
   color: #2b4234;
-  font-size: 13px;
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2817,14 +2818,14 @@ body {
 .owner-listing-info small {
   overflow: hidden;
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .owner-listing-info small {
   color: #315b42;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -2846,7 +2847,7 @@ body {
   border-radius: 999px;
   background: #f2f6f1;
   color: #526a59;
-  font-size: 11px;
+  font-size: 11.9px;
   line-height: 1.3;
 }
 
@@ -2866,7 +2867,7 @@ body {
   color: #159c96;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2885,7 +2886,7 @@ body {
   align-content: start;
   gap: 6px;
   color: #47564a;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
 }
 
@@ -2901,7 +2902,7 @@ body {
   background: #fbfcfa;
   color: #29392e;
   font: inherit;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .owner-listing-editor-form textarea {
@@ -2936,7 +2937,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -2950,7 +2951,7 @@ body {
   display: block;
   margin-top: 10px;
   color: #765a2c;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -2982,12 +2983,12 @@ body {
 
 .owner-activity-row strong {
   color: #344a3b;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-activity-row small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .activity-dot {
@@ -3002,7 +3003,7 @@ body {
 .owner-form-message {
   margin: 0 0 10px;
   color: #365f43;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .owner-form-message.is-error {
@@ -3029,7 +3030,7 @@ body {
 .profile-panel .account-heading h2 {
   margin: 8px 0 0;
   color: #263b30;
-  font-size: 18px;
+  font-size: 19.4px;
   letter-spacing: -.03em;
 }
 
@@ -3102,7 +3103,7 @@ body {
   border-radius: 12px;
   background: #159c96;
   color: #fff;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 750;
 }
 
@@ -3116,14 +3117,14 @@ body {
 .workspace-sidebar-heading > div:last-child span,
 .workspace-topbar > div > span {
   color: #7a8b7e;
-  font-size: 10px;
+  font-size: 10.8px;
   font-weight: 750;
   letter-spacing: .12em;
 }
 
 .workspace-sidebar-heading strong {
   color: #263b30;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .workspace-sidebar nav {
@@ -3140,7 +3141,7 @@ body {
   padding: 0 12px;
   border-radius: 9px;
   color: #617267;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   transition: background .15s ease, color .15s ease;
@@ -3148,7 +3149,7 @@ body {
 
 .workspace-sidebar nav a > span {
   color: #9aa79c;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 750;
 }
 
@@ -3187,7 +3188,7 @@ body {
 .workspace-sidebar-profile strong {
   overflow: hidden;
   color: #354a3b;
-  font-size: 12px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3195,7 +3196,7 @@ body {
 .workspace-sidebar-profile small {
   overflow: hidden;
   color: #77867b;
-  font-size: 11px;
+  font-size: 11.9px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3209,7 +3210,7 @@ body {
   color: #42654e;
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 700;
 }
 
@@ -3242,12 +3243,12 @@ body {
 
 .workspace-topbar > div > strong {
   color: #304737;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .workspace-welcome {
   color: #728177;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .workspace-page {
@@ -3372,7 +3373,7 @@ body {
   }
 
   .dashboard-stat strong {
-    font-size: 24px;
+    font-size: 25.9px;
   }
 
   .tenant-rental-grid {
@@ -3406,7 +3407,7 @@ body {
 
   .owner-listing-row .listing-state {
     padding: 5px 7px;
-    font-size: 10px;
+    font-size: 10.8px;
   }
 }
 
@@ -3431,7 +3432,7 @@ body {
   display: grid;
   gap: 6px;
   color: #47564a;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 600;
 }
 
@@ -3448,7 +3449,7 @@ body {
   background: #fbfcfa;
   color: #29392e;
   font: inherit;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .community-ticket-form button,
@@ -3461,7 +3462,7 @@ body {
   background: #159c96;
   color: #fff;
   font: inherit;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 650;
   cursor: pointer;
 }
@@ -3501,14 +3502,14 @@ body {
 .community-ticket-list article > small,
 .admin-record > small {
   color: #718077;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .community-announcements article > strong,
 .community-ticket-list article strong,
 .admin-record-heading strong {
   color: #294332;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .community-announcements article p,
@@ -3516,7 +3517,7 @@ body {
 .admin-record > p {
   margin: 0;
   color: #56665a;
-  font-size: 15px;
+  font-size: 16.2px;
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -3528,7 +3529,7 @@ body {
 .community-ticket-list h3 {
   margin: 0;
   color: #294332;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .community-ticket-list article > div,
@@ -3551,12 +3552,12 @@ body {
   border-left: 3px solid #4a805d;
   background: #f5f8f4;
   color: #536256;
-  font-size: 14px;
+  font-size: 15.1px;
   white-space: pre-wrap;
 }
 
 .community-ticket-list blockquote strong {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-record-list {
@@ -3570,7 +3571,7 @@ body {
 
 .admin-record-heading > div span {
   color: #718077;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-record-controls {
@@ -3589,7 +3590,7 @@ body {
   display: block;
   margin-top: 4px;
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-table .status-tag {
@@ -3606,7 +3607,7 @@ body {
 
 .admin-reports-grid > .admin-panel > p {
   color: #68776b;
-  font-size: 15px;
+  font-size: 16.2px;
   line-height: 1.6;
 }
 
@@ -3646,7 +3647,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
 }
@@ -3665,7 +3666,7 @@ body {
 .rental-request-error {
   margin: 9px 0 0;
   color: #326345;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -3694,7 +3695,7 @@ body {
 .sales-forecast-heading h2 {
   margin: 5px 0 0;
   color: #102c3b;
-  font-size: 20px;
+  font-size: 21.6px;
 }
 
 .forecast-signal {
@@ -3703,7 +3704,7 @@ body {
   border-radius: 999px;
   background: #fff2dd;
   color: #805c1e;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -3716,7 +3717,7 @@ body {
 .sales-forecast-empty {
   margin: 0;
   color: #60737c;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.55;
 }
 
@@ -3739,12 +3740,12 @@ body {
   padding-top: 12px;
   border-top: 1px solid #e6eeee;
   color: #52676f;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .sales-forecast-summary span {
   color: #117d79;
-  font-size: 18px;
+  font-size: 19.4px;
   font-weight: 750;
 }
 
@@ -3793,7 +3794,7 @@ body {
   background: #f7f9f6;
   color: #43584a;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 23.8px;
   line-height: 1;
 }
 
@@ -3804,14 +3805,14 @@ body {
 .request-dialog h2 {
   margin: 8px 36px 0 0;
   color: #102c3b;
-  font-size: clamp(22px, 4vw, 29px);
+  font-size: clamp(23.8px, 4.3vw, 31.3px);
   letter-spacing: -.045em;
 }
 
 .request-dialog-intro {
   margin: 12px 0 18px;
   color: #68766f;
-  font-size: 16px;
+  font-size: 17.3px;
   line-height: 1.65;
 }
 
@@ -3826,12 +3827,12 @@ body {
 
 .request-rental-summary strong {
   color: #2a4635;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .request-rental-summary span {
   color: #68766f;
-  font-size: 15px;
+  font-size: 16.2px;
   line-height: 1.5;
 }
 
@@ -3851,7 +3852,7 @@ body {
   display: grid;
   gap: 8px;
   color: #3d5145;
-  font-size: 15px;
+  font-size: 16.2px;
   font-weight: 650;
 }
 
@@ -3867,7 +3868,7 @@ body {
   background: #fbfcfa;
   color: #283b30;
   font: inherit;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .request-form textarea {
@@ -3898,19 +3899,19 @@ body {
 .rental-agreement > .eyebrow {
   margin: 0;
   color: #66806d;
-  font-size: 11px;
+  font-size: 11.9px;
   letter-spacing: .12em;
 }
 
 .rental-agreement h3 {
   margin: 0;
   color: #203d2c;
-  font-size: 18px;
+  font-size: 19.4px;
 }
 
 .rental-agreement-document {
   color: #4e5e53;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -3930,7 +3931,7 @@ body {
   align-items: flex-start;
   gap: 10px !important;
   color: #344a3a !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   line-height: 1.5;
 }
 
@@ -3952,7 +3953,7 @@ body {
   border-radius: 999px;
   background: rgba(255, 243, 217, .96);
   color: #795820;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 700;
 }
 
@@ -3991,7 +3992,7 @@ body {
 }
 
 .tenant-payment-action strong {
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .tenant-payment-action button {
@@ -4003,7 +4004,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4023,7 +4024,7 @@ body {
   border-radius: 9px;
   background: #f3f8f3;
   color: #365744;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -4051,13 +4052,13 @@ body {
 
 .tenant-request-row strong {
   color: #2b4234;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .tenant-request-row span,
 .tenant-request-row small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .listing-approved {
@@ -4099,7 +4100,7 @@ body {
   align-items: center;
   gap: 10px;
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-payment-heading-actions button {
@@ -4114,20 +4115,20 @@ body {
 
 .owner-request-heading strong {
   color: #2b4234;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .owner-request-card > p {
   margin: 9px 0 5px;
   color: #41564a;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .owner-request-card > small,
 .owner-request-contact {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
   line-height: 1.5;
 }
 
@@ -4167,12 +4168,12 @@ body {
   gap: 5px;
   margin-top: 9px;
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .owner-renter-facts strong {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .renter-balance-due {
@@ -4189,7 +4190,7 @@ body {
   border-left: 2px solid #c7dac9;
   background: #f5f8f4;
   color: #53665a;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
@@ -4207,7 +4208,7 @@ body {
   display: grid;
   gap: 5px;
   color: #41564a;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-renter-form input,
@@ -4221,7 +4222,7 @@ body {
   background: #fff;
   color: #2b4234;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .owner-renter-form textarea {
@@ -4249,7 +4250,7 @@ body {
   padding-left: 10px;
   border-left: 2px solid #c7dac9;
   color: #53665a;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -4273,7 +4274,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4298,7 +4299,7 @@ body {
 
 .payment-confirmation-intro {
   color: #64736a;
-  font-size: 15px;
+  font-size: 16.2px;
   line-height: 1.6;
 }
 
@@ -4311,7 +4312,7 @@ body {
   border-radius: 10px;
   background: #f6f9f5;
   color: #52645a;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .payment-confirmation-summary strong {
@@ -4335,7 +4336,7 @@ body {
   gap: 9px;
   margin-top: 12px;
   color: #354b3c;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
@@ -4355,7 +4356,7 @@ body {
   border-radius: 8px;
   background: #f0f8f1;
   color: #315940;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -4378,7 +4379,7 @@ body {
 
 .online-payment-options span {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .tenant-payment-action .online-payment-options button,
@@ -4391,7 +4392,7 @@ body {
   color: #159c96;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4414,7 +4415,7 @@ body {
 
 .physical-payment-action summary {
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4429,7 +4430,7 @@ body {
 .owner-payment-workspace > .dashboard-panel > p {
   margin: 0;
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -4438,7 +4439,7 @@ body {
   display: grid;
   gap: 6px;
   color: #41564a;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4448,7 +4449,7 @@ body {
   gap: 8px;
   margin-top: 2px;
   color: #3a4d42;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.5;
 }
@@ -4467,7 +4468,7 @@ body {
   border: 1px solid #dce4dd;
   border-radius: 6px;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .tenant-payment-action .wallet-qr-image,
@@ -4499,12 +4500,12 @@ body {
   border-radius: 7px;
   background: #fff;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-qr-form small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 400;
 }
 
@@ -4522,7 +4523,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4532,7 +4533,7 @@ body {
   border-radius: 8px;
   background: #f1f6f0;
   color: #496253;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -4675,7 +4676,7 @@ body {
 
 .admin-task-list button span {
   color: #314a38;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -4776,7 +4777,7 @@ body {
 
 .admin-edit-modal > .eyebrow {
   color: #66806d;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 750;
   letter-spacing: .13em;
 }
@@ -4784,7 +4785,7 @@ body {
 .admin-edit-modal h2 {
   margin: 8px 36px 20px 0;
   color: #294332;
-  font-size: 24px;
+  font-size: 25.9px;
 }
 
 .admin-edit-form {
@@ -4798,7 +4799,7 @@ body {
   align-content: start;
   gap: 6px;
   color: #47564a;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 600;
 }
 
@@ -4814,7 +4815,7 @@ body {
   background: #fbfcfa;
   color: #29392e;
   font: inherit;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .admin-edit-form textarea {
@@ -4948,7 +4949,7 @@ body {
 .owner-verification-upload > p {
   margin: 0 0 12px;
   color: #718077;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -4964,7 +4965,7 @@ body {
   flex: 1 1 260px;
   gap: 6px;
   color: #41564a;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -4975,7 +4976,7 @@ body {
   border-radius: 7px;
   background: #fff;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-verification-form button {
@@ -4987,7 +4988,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -5002,7 +5003,7 @@ body {
   margin: 12px 0;
   padding-left: 24px;
   color: #41564a;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .verification-checklist li {
@@ -5019,12 +5020,12 @@ body {
 .verification-checklist li > span,
 .verification-checklist li > small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .owner-verification-upload > small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
   line-height: 1.5;
 }
 
@@ -5041,7 +5042,7 @@ body {
   color: #159c96;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -5067,19 +5068,19 @@ body {
 
 .rent-notification strong {
   color: #263b30;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rent-notification p {
   margin: 4px 0;
   color: #59675e;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .rent-notification small {
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .rent-notification-actions {
@@ -5091,7 +5092,7 @@ body {
 
 .rent-notification-actions a {
   color: #159c96;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -5104,12 +5105,12 @@ body {
 .owner-income-total span,
 .owner-income-total small {
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .owner-income-total strong {
   color: #159c96;
-  font-size: 24px;
+  font-size: 25.9px;
 }
 
 .owner-income-line-chart {
@@ -5130,18 +5131,18 @@ body {
 
 .admin-owner-documents a {
   color: #159c96;
-  font-size: 11px;
+  font-size: 11.9px;
   text-decoration: underline;
 }
 
 .admin-owner-documents small {
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .admin-owner-documents > strong {
   flex-basis: 100%;
   color: #41564a;
-  font-size: 11px;
+  font-size: 11.9px;
 }
 
 .admin-owner-document-checklist {
@@ -5172,7 +5173,7 @@ body {
   color: #159c96;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -5210,7 +5211,7 @@ body {
   border-radius: 50%;
   background: #edf4ee;
   color: #159c96;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 750;
 }
 
@@ -5223,13 +5224,13 @@ body {
 .admin-payment-owner-row strong,
 .admin-payment-owner-row b {
   color: #263b30;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .admin-payment-owner-row small {
   overflow: hidden;
   color: #718077;
-  font-size: 11px;
+  font-size: 11.9px;
   text-overflow: ellipsis;
 }
 
@@ -5271,7 +5272,7 @@ body {
 .admin-rating-card > span,
 .owner-rating-rank {
   color: #718477;
-  font-size: 11px;
+  font-size: 11.9px;
   font-weight: 750;
   letter-spacing: .08em;
 }
@@ -5280,25 +5281,25 @@ body {
 .owner-rating-card > strong {
   overflow-wrap: anywhere;
   color: #263b30;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .admin-rating-card > small,
 .owner-rating-card > small {
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-rating-card > b,
 .owner-rating-score {
   color: #b17a17;
-  font-size: 21px;
+  font-size: 22.7px;
 }
 
 .admin-rating-card > b small,
 .owner-rating-score small {
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -5332,13 +5333,13 @@ body {
 
 .admin-review-card-heading strong {
   color: #294332;
-  font-size: 16px;
+  font-size: 17.3px;
 }
 
 .admin-review-card-heading small,
 .admin-review-meta {
   color: #718077;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .admin-review-stars {
@@ -5349,7 +5350,7 @@ body {
 .admin-review-card > p {
   margin: 0;
   color: #526257;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -5409,19 +5410,19 @@ body {
 
 .tenant-request-summary strong {
   color: #203b2e;
-  font-size: 16px;
+  font-size: 17.3px;
   line-height: 1.35;
 }
 
 .tenant-request-summary span {
   color: #607466;
-  font-size: 14px;
+  font-size: 15.1px;
   line-height: 1.5;
 }
 
 .tenant-request-summary small {
   color: #77877c;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -5452,7 +5453,7 @@ body {
   display: grid;
   gap: 6px;
   color: #40594a;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -5466,7 +5467,7 @@ body {
   background: #fff;
   color: #263d30;
   font: inherit;
-  font-size: 15px;
+  font-size: 16.2px;
 }
 
 .tenant-review-form select {
@@ -5494,7 +5495,7 @@ body {
   color: #fff;
   cursor: pointer;
   font: inherit;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 700;
   transition: background .18s ease, transform .18s ease;
 }
@@ -5518,7 +5519,7 @@ body {
 
 .property-photo-field label {
   color: #40594a;
-  font-size: 14px;
+  font-size: 15.1px;
   font-weight: 700;
 }
 
@@ -5528,12 +5529,12 @@ body {
   padding: 4px 0;
   color: #40594a;
   font: inherit;
-  font-size: 14px;
+  font-size: 15.1px;
 }
 
 .property-photo-field small {
   color: #6c7d70;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -5676,5 +5677,135 @@ html {
 
   .line-chart {
     height: 230px;
+  }
+}
+
+.reservation-calendar-panel {
+  margin-top: 18px;
+}
+
+.reservation-calendar-summary {
+  margin: 0 0 14px;
+  color: #64746a;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.reservation-calendar .fc {
+  --fc-border-color: #e0e8e0;
+  --fc-button-text-color: #315b42;
+  --fc-button-bg-color: #fff;
+  --fc-button-border-color: #d3dfd4;
+  --fc-button-hover-bg-color: #edf4ed;
+  --fc-button-hover-border-color: #b7cdb9;
+  --fc-button-active-bg-color: #159c96;
+  --fc-button-active-border-color: #159c96;
+  --fc-today-bg-color: #f0f8f6;
+  color: #263b30;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.reservation-calendar .fc .fc-toolbar-title {
+  color: #263b30;
+  font-size: 1.35em;
+  font-weight: 650;
+}
+
+.reservation-calendar .fc .fc-button {
+  border-radius: 7px;
+  box-shadow: none;
+  font: inherit;
+  font-weight: 650;
+  text-transform: none;
+}
+
+.reservation-calendar .fc .fc-button:focus {
+  box-shadow: 0 0 0 3px rgba(21, 156, 150, .2);
+}
+
+.reservation-calendar .fc .fc-daygrid-event {
+  border-color: #159c96;
+  background: #159c96;
+  white-space: normal;
+}
+
+.reservation-calendar .fc .reservation-event-ended {
+  border-color: #829087;
+  background: #829087;
+}
+
+.reservation-calendar .fc .fc-event-title {
+  font-weight: 600;
+}
+
+.reservation-calendar-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 16px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #dce7dc;
+  border-radius: 10px;
+  background: #f8fbf7;
+}
+
+.reservation-calendar-detail > div p,
+.reservation-calendar-detail > div h3 {
+  margin: 0;
+}
+
+.reservation-calendar-detail > div h3 {
+  margin-top: 5px;
+  color: #294332;
+  font-size: 18px;
+}
+
+.reservation-calendar-detail > button {
+  align-self: start;
+  padding: 7px 10px;
+  border: 1px solid #d3dfd4;
+  border-radius: 7px;
+  background: #fff;
+  color: #315b42;
+  cursor: pointer;
+  font: inherit;
+}
+
+.reservation-calendar-detail > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #56665a;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .reservation-calendar .fc .fc-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reservation-calendar .fc .fc-toolbar-chunk {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .reservation-calendar .fc .fc-toolbar-title {
+    margin: 3px 0;
+    text-align: center;
+  }
+
+  .reservation-calendar .fc .fc-button {
+    padding: .35em .5em;
+  }
+
+  .reservation-calendar-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reservation-calendar-detail > p {
+    grid-column: 1;
   }
 }
